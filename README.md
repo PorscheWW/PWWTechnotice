@@ -1,5 +1,3 @@
-# PWWTechnotice
-PWW334 Tech notices
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,7 +112,7 @@ PWW334 Tech notices
 
 <div class="container">
 
-    <!-- SAMPLE NOTICE (Replace with backend data) -->
+    <!-- SAMPLE NOTICE (Replace with real data later) -->
     <div class="notice priority-critical">
         <div class="notice-title">ASB2 Stop Delivery – Immediate Action Required</div>
         <div class="meta">
