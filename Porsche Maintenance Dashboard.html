@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Porsche Technical Maintenance Dashboard</title>
+<style>
+:root {
+  --p-red: #D5001C;
+  --p-dark: #141414;
+  --p-gray: #1E1E1E;
+  --p-mid: #2A2A2A;
+  --p-light: #3A3A3A;
+  --p-white: #F0F0F0;
+  --p-silver: #888;
+  --p-gold: #C5A028;
+  --green: #43A047;
+  --amber: #FB8C00;
+  --blue: #1E88E5;
+  --purple: #8E24AA;
+  --red: #E53935;
+  --teal: #00897B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--p-dark);color:var(--p-white);min-height:100vh;line-height:1.5}
+a{color:var(--blue);text-decoration:none}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#111 0%,#1E1E1E 50%,#111 100%);border-bottom:3px solid var(--p-red);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.h-left{display:flex;align-items:center;gap:14px}
+.crest{width:48px;height:48px;background:var(--p-red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;box-shadow:0 0 20px rgba(213,0,28,0.35)}
+.h-title h1{font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.h-title p{font-size:10px;color:var(--p-silver);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
+.h-badge{background:rgba(213,0,28,0.12);border:1px solid rgba(213,0,28,0.35);border-radius:6px;padding:5px 12px;font-size:10px;color:#ff6b6b;letter-spacing:1px;text-transform:uppercase}
+
+/* SEARCH & FILTER */
+.search-bar{padding:12px 28px;background:var(--p-gray);border-bottom:1px solid #333;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search-bar input{background:#2A2A2A;border:1px solid #444;border-radius:6px;padding:8px 14px;color:#fff;font-size:13px;width:280px;outline:none;transition:border .2s}
+.search-bar input:focus{border-color:var(--p-red)}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:#2A2A2A;border:1px solid #444;border-radius:20px;padding:5px 14px;font-size:11px;color:#ccc;cursor:pointer;transition:all .2s;user-select:none}
+.chip:hover,.chip.active{background:var(--p-red);border-color:var(--p-red);color:#fff}
+
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:4px;margin-left:auto}
+.view-btn{background:#2A2A2A;border:1px solid #444;border-radius:6px;padding:5px 12px;font-size:11px;color:#ccc;cursor:pointer;transition:all .2s}
+.view-btn.active,.view-btn:hover{background:var(--p-red);border-color:var(--p-red);color:#fff}
+
+/* MODEL TABS */
+.tab-bar{display:flex;background:var(--p-gray);border-bottom:2px solid #333;padding:0 28px;overflow-x:auto}
+.tab{padding:12px 22px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--p-silver);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;user-select:none}
+.tab:hover{color:#fff;background:rgba(255,255,255,0.03)}
+.tab.active{color:#fff;border-bottom-color:var(--p-red)}
+
+/* MODEL PANEL */
+.panel{display:none;padding:0 28px 40px}
+.panel.active{display:block}
+.model-hdr{padding:24px 0 16px;border-bottom:1px solid #333;margin-bottom:20px}
+.model-hdr h2{font-size:22px;font-weight:700;letter-spacing:1px}
+.model-hdr h2 span{color:var(--p-red)}
+.model-hdr p{font-size:12px;color:var(--p-silver);margin-top:4px;letter-spacing:.5px}
+.badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.badge{font-size:10px;padding:4px 10px;border-radius:4px;letter-spacing:.5px;font-weight:600;text-transform:uppercase}
+.badge-ice{background:rgba(30,136,229,0.15);color:#64B5F6;border:1px solid rgba(30,136,229,0.3)}
+.badge-ev{background:rgba(0,137,123,0.15);color:#4DB6AC;border:1px solid rgba(0,137,123,0.3)}
+.badge-hybrid{background:rgba(142,36,170,0.15);color:#CE93D8;border:1px solid rgba(142,36,170,0.3)}
+.badge-suv{background:rgba(251,140,0,0.15);color:#FFB74D;border:1px solid rgba(251,140,0,0.3)}
+.badge-sport{background:rgba(213,0,28,0.15);color:#EF9A9A;border:1px solid rgba(213,0,28,0.3)}
+
+/* SMART SERVICE BANNER */
+.ss-banner{background:linear-gradient(135deg,rgba(213,0,28,0.08),rgba(197,160,40,0.06));border:1px solid rgba(213,0,28,0.2);border-radius:8px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;font-size:13px;color:#ddd}
+.ss-banner .ico{font-size:22px;flex-shrink:0}
+
+/* SECTION TOGGLE */
+.section-toggle{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.stog{background:var(--p-mid);border:1px solid #444;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:600;color:#ccc;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.stog.active{background:rgba(213,0,28,0.15);border-color:var(--p-red);color:#fff}
+.stog:hover{border-color:var(--p-red)}
+
+/* CONTENT GRID - Maintenance + Priority */
+.content-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;margin-bottom:30px}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}}
+.section-block{display:none}.section-block.active{display:block}
+
+/* INTERVAL TABLE */
+.itbl{width:100%;border-collapse:collapse;font-size:13px}
+.itbl thead th{background:var(--p-mid);padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--p-silver);border-bottom:2px solid #444;position:sticky;top:0}
+.itbl tbody tr{border-bottom:1px solid #2A2A2A;transition:background .15s}
+.itbl tbody tr:hover{background:rgba(255,255,255,0.02)}
+.itbl td{padding:10px 12px;vertical-align:top}
+.svc-name{font-weight:600;font-size:13px}
+.svc-desc{font-size:11px;color:var(--p-silver);margin-top:2px}
+.sec-row td{background:var(--p-light);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--p-silver);padding:8px 12px;cursor:pointer}
+.sec-row:hover td{background:#444}
+
+/* INTERVAL BADGES */
+.ibadge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+.ib-annual{background:rgba(30,136,229,0.15);color:#64B5F6;border:1px solid rgba(30,136,229,0.25)}
+.ib-biennial{background:rgba(251,140,0,0.15);color:#FFB74D;border:1px solid rgba(251,140,0,0.25)}
+.ib-quad{background:rgba(229,57,53,0.15);color:#EF9A9A;border:1px solid rgba(229,57,53,0.25)}
+.ib-every{background:rgba(67,160,71,0.15);color:#81C784;border:1px solid rgba(67,160,71,0.25)}
+.ib-seasonal{background:rgba(142,36,170,0.15);color:#CE93D8;border:1px solid rgba(142,36,170,0.25)}
+.ib-na{background:rgba(100,100,100,0.15);color:#999;border:1px solid rgba(100,100,100,0.25)}
+
+/* PILLS */
+.pill{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.pill-red{background:rgba(229,57,53,0.15);color:#EF9A9A}
+.pill-blue{background:rgba(30,136,229,0.15);color:#64B5F6}
+.pill-green{background:rgba(67,160,71,0.15);color:#81C784}
+.pill-amber{background:rgba(251,140,0,0.15);color:#FFB74D}
+.pill-purple{background:rgba(142,36,170,0.15);color:#CE93D8}
+.pill-teal{background:rgba(0,137,123,0.15);color:#4DB6AC}
+
+/* PRIORITY SIDEBAR */
+.priority-card{background:var(--p-mid);border:1px solid #3A3A3A;border-radius:8px;overflow:hidden}
+.pc-hdr{background:rgba(213,0,28,0.08);border-bottom:1px solid rgba(213,0,28,0.2);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.pc-hdr h4{font-size:13px;font-weight:700;letter-spacing:.5px}
+.pi{padding:14px 16px;border-bottom:1px solid #333;display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#ccc;line-height:1.55}
+.pi:last-child{border-bottom:none}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dot-red{background:var(--red)}.dot-amber{background:var(--amber)}.dot-blue{background:var(--blue)}.dot-green{background:var(--green)}.dot-purple{background:var(--purple)}
+
+/* ISSUES & OPPORTUNITIES */
+.io-section{margin-top:10px}
+.io-section h3{font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #333;letter-spacing:.5px}
+.io-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px}
+@media(max-width:900px){.io-grid{grid-template-columns:1fr}}
+.io-card{background:var(--p-mid);border:1px solid #3A3A3A;border-radius:8px;overflow:hidden;transition:border-color .2s}
+.io-card:hover{border-color:#555}
+.io-card-hdr{padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;user-select:none}
+.io-card-hdr:hover{background:rgba(255,255,255,0.02)}
+.sev{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.sev-critical{background:#E53935;box-shadow:0 0 8px rgba(229,57,53,0.4)}
+.sev-important{background:#FB8C00;box-shadow:0 0 8px rgba(251,140,0,0.3)}
+.sev-note{background:#1E88E5;box-shadow:0 0 8px rgba(30,136,229,0.3)}
+.sev-opportunity{background:#43A047;box-shadow:0 0 8px rgba(67,160,71,0.3)}
+.io-title{font-size:13px;font-weight:700;flex:1}
+.io-sev-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:3px;white-space:nowrap}
+.sev-l-critical{background:rgba(229,57,53,0.15);color:#EF9A9A}
+.sev-l-important{background:rgba(251,140,0,0.15);color:#FFB74D}
+.sev-l-note{background:rgba(30,136,229,0.15);color:#64B5F6}
+.sev-l-opportunity{background:rgba(67,160,71,0.15);color:#81C784}
+.io-arrow{color:#666;font-size:16px;transition:transform .2s;flex-shrink:0}
+.io-card.open .io-arrow{transform:rotate(90deg)}
+.io-body{display:none;padding:0 16px 16px;font-size:12px;color:#bbb;line-height:1.6}
+.io-card.open .io-body{display:block}
+.io-body p{margin-bottom:8px}
+.io-body .src{display:inline-flex;align-items:center;gap:5px;background:rgba(197,160,40,0.1);border:1px solid rgba(197,160,40,0.25);border-radius:4px;padding:3px 10px;font-size:10px;color:var(--p-gold);font-weight:600;letter-spacing:.3px;margin-top:4px}
+.io-body .src::before{content:"\1F4C4"}
+.io-body .tip{background:rgba(30,136,229,0.06);border-left:3px solid var(--blue);padding:8px 12px;border-radius:0 4px 4px 0;margin-top:8px;font-size:11px;color:#90CAF9}
+.io-body .tip strong{color:#64B5F6}
+
+/* LEGEND */
+.legend{padding:20px 28px;border-top:1px solid #333;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--p-silver)}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+
+/* FOOTER */
+footer{text-align:center;padding:20px;font-size:10px;color:#555;letter-spacing:1px;border-top:1px solid #222}
+
+/* PRICING TABLE */
+.price-section{margin-top:10px}
+.price-section h3{font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #333;letter-spacing:.5px}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px}
+.price-card{background:var(--p-mid);border:1px solid #3A3A3A;border-radius:8px;padding:16px;transition:border-color .2s}
+.price-card:hover{border-color:#555}
+.price-card .pc-label{font-size:10px;color:var(--p-silver);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.price-card .pc-service{font-size:14px;font-weight:700;margin-bottom:4px}
+.price-card .pc-price{font-size:22px;font-weight:800;color:var(--p-gold);margin-bottom:6px}
+.price-card .pc-detail{font-size:11px;color:#aaa;line-height:1.5}
+.price-card .pc-op{font-size:10px;color:#666;margin-top:6px;font-family:monospace}
+.price-card .pc-turbo{font-size:11px;color:#EF9A9A;margin-top:4px}
+.price-addons{margin-top:12px}
+.addon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.addon-item{background:rgba(42,42,42,0.6);border:1px solid #333;border-radius:6px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center}
+.addon-item .addon-name{font-size:12px;font-weight:600}
+.addon-item .addon-price{font-size:13px;font-weight:700;color:var(--p-gold)}
+.addon-item .addon-time{font-size:10px;color:var(--p-silver);margin-top:2px}
+
+/* LABOR/PARTS OEM DATA */
+.labor-section{margin-top:10px}
+.labor-section h3{font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #333;letter-spacing:.5px}
+.labor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
+.labor-card{background:var(--p-mid);border:1px solid #3A3A3A;border-radius:8px;overflow:hidden}
+.labor-card-hdr{background:rgba(197,160,40,0.06);border-bottom:1px solid rgba(197,160,40,0.15);padding:12px 14px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.labor-card-hdr .tu-badge{background:rgba(197,160,40,0.12);border:1px solid rgba(197,160,40,0.3);border-radius:4px;padding:3px 8px;font-size:10px;color:var(--p-gold);font-weight:700}
+.labor-card-body{padding:10px 14px;font-size:11px;color:#bbb}
+.parts-list{list-style:none;padding:0}
+.parts-list li{padding:4px 0;border-bottom:1px solid #2A2A2A;display:flex;justify-content:space-between}
+.parts-list li:last-child{border-bottom:none}
+.parts-list .pn{font-family:monospace;font-size:10px;color:#888}
+
+/* WARRANTY SECTION */
+.warranty-section{margin-top:10px}
+.warranty-section h3{font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #333;letter-spacing:.5px}
+.war-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.war-card{background:var(--p-mid);border:1px solid #3A3A3A;border-radius:8px;overflow:hidden}
+.war-card-hdr{padding:14px 16px;border-bottom:1px solid #333;display:flex;align-items:center;gap:10px}
+.war-card-hdr .war-ico{font-size:20px}
+.war-card-hdr h4{font-size:13px;font-weight:700}
+.war-card-body{padding:14px 16px;font-size:12px;color:#bbb;line-height:1.6}
+.war-card-body ul{list-style:none;padding:0;margin:0}
+.war-card-body li{padding:6px 0;border-bottom:1px solid #2A2A2A;display:flex;gap:8px}
+.war-card-body li:last-child{border-bottom:none}
+.war-card-body .war-label{font-weight:700;color:#ddd;min-width:140px;flex-shrink:0}
+.war-card-body .war-val{color:var(--p-gold);font-weight:600}
+.war-highlight{background:rgba(229,57,53,0.06);border-left:3px solid var(--red);padding:10px 14px;border-radius:0 6px 6px 0;margin-top:10px;font-size:11px;color:#EF9A9A}
+
+/* Additional view buttons */
+.section-block.active{display:block}
+
+</style>
+</head>
+<body>
+
+
+<header>
+  <div class="h-left">
+    <div class="crest">P</div>
+    <div class="h-title">
+      <h1>Porsche Technical Dashboard</h1>
+      <p>Service Consultant Reference &bull; Maintenance &bull; Issues &bull; Opportunities</p>
+    </div>
+  </div>
+  <div class="h-badge">OEM Source-Backed &bull; 2026</div>
+</header>
+
+
+<div class="search-bar">
+  <input type="text" id="globalSearch" placeholder="Search maintenance items, issues, or keywords..." oninput="filterAll()"/>
+  <div class="filter-chips">
+    <div class="chip active" onclick="setFilter('all',this)">All</div>
+    <div class="chip" onclick="setFilter('annual',this)">Annual</div>
+    <div class="chip" onclick="setFilter('biennial',this)">2-Year</div>
+    <div class="chip" onclick="setFilter('quad',this)">4-Year</div>
+    <div class="chip" onclick="setFilter('every',this)">Every Service</div>
+  </div>
+  <div class="view-toggle">
+    <div class="view-btn active" onclick="setView('maint',this)">Maintenance</div>
+    <div class="view-btn" onclick="setView('issues',this)">Issues &amp; Opps</div>
+    <div class="view-btn" onclick="setView('pricing',this)">Pricing</div>
+    <div class="view-btn" onclick="setView('labor',this)">OEM Labor/Parts</div>
+    <div class="view-btn" onclick="setView('warranty',this)">Warranty</div>
+    <div class="view-btn" onclick="setView('all',this)">All</div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showModel('m911',this)">911</div>
+  <div class="tab" onclick="showModel('m718',this)">718 Boxster / Cayman</div>
+  <div class="tab" onclick="showModel('mcay',this)">Cayenne</div>
+  <div class="tab" onclick="showModel('mmac',this)">Macan</div>
+  <div class="tab" onclick="showModel('mpan',this)">Panamera</div>
+  <div class="tab" onclick="showModel('mtay',this)">Taycan</div>
+</div>
+
+<div id="m911" class="panel active">
+  <div class="model-hdr">
+    <h2><span>911</span> &bull; Carrera &bull; Targa &bull; Turbo &bull; GT3 &bull; GT3 RS</h2>
+    <p>992 (2020&ndash;Present) &nbsp;|&nbsp; 991 (2012&ndash;2019) &nbsp;|&nbsp; 997 (2005&ndash;2011) &nbsp;|&nbsp; 996 (1999&ndash;2004)</p>
+    <div class="badges">
+      <span class="badge badge-ice">Flat-6 Twin-Turbo (992)</span>
+      <span class="badge badge-sport">Rear &amp; Mid-Engine</span>
+      <span class="badge badge-ice">9A2evo Engine Platform</span>
+    </div>
+  </div>
+  <div class="ss-banner">
+    <div class="ico">&#128736;</div>
+    <div><strong>Porsche Smart Service:</strong> The 992 uses condition-based monitoring for all intervals. Physical maintenance booklets are replaced by digital service records via PIWIS. Intervals below represent <em>maximum</em> limits; Smart Service may call for earlier service based on driving conditions, oil quality sensors, and usage patterns.</div>
+  </div>
+
+  <div class="section-block active" id="m911-maint">
+  <div class="content-grid">
+    <div>
+      <table class="itbl">
+        <thead><tr><th style="width:40%">Service Item</th><th style="width:25%">Interval</th><th>Notes</th></tr></thead>
+        <tbody>
+
+<tr class="sec-row"><td colspan="3">&#9660; Engine &amp; Lubrication</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Engine Oil &amp; Filter</div><div class="svc-desc">Porsche C40 SAE 0W-40 (or VW 511 00) &mdash; 8.0L capacity w/ filter (992)</div></td>
+  <td><span class="ibadge ib-annual">1 Year / 10,000 mi</span></td>
+  <td><span class="pill pill-blue">Smart Service</span></td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Plastic Oil Drain Plug</div><div class="svc-desc">992/991.2: Single-use plastic plug &mdash; MUST replace at every oil change</div></td>
+  <td><span class="ibadge ib-every">Replace Every Oil Change</span></td>
+  <td><span class="pill pill-red">CRITICAL</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Spark Plugs</div><div class="svc-desc">6 plugs (Carrera) &mdash; piezo injectors at 200 bar (992)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Air Filter (Engine)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Fluids &amp; Cooling</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Brake Fluid</div><div class="svc-desc">BASF Hydraulan 404 (Group fluid, 2020+)</div></td>
+  <td><span class="ibadge ib-biennial">Every 2 Years</span></td>
+  <td><span class="pill pill-red">Mandatory</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Coolant</div><div class="svc-desc">Glysantin G40, antifreeze to -37&deg;C</div></td>
+  <td><span class="ibadge ib-quad">Inspect 2 yrs / Change 4&ndash;6 yrs</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Drivetrain &amp; Transmission</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">PDK Transmission Fluid</div><div class="svc-desc">7-speed (991) / 8-speed (992) dual-clutch</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-amber">Often Missed</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Front Differential Fluid</div><div class="svc-desc">AWD models (Carrera 4, Targa 4, Turbo)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Rear Differential / PTV+ Fluid</div><div class="svc-desc">Limited-slip / Torque Vectoring models</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Filters, Safety &amp; Wear</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Cabin / Pollen Filter</div><div class="svc-desc">992: 3-layer biofunctional anti-allergen filter</div></td>
+  <td><span class="ibadge ib-biennial">2 Years / 20,000 mi</span></td>
+  <td><span class="pill pill-teal">992 Unique</span></td>
+</tr>
+<tr class="data-row ib-seasonal">
+  <td><div class="svc-name">Wiper Blades</div></td>
+  <td><span class="ibadge ib-seasonal">Twice Per Year</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Brake Pads &amp; Rotors</div><div class="svc-desc">PCCB optional; standard cast iron on most</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Tire Condition &amp; Pressure</div><div class="svc-desc">Mixed sizes front/rear on all 911 variants</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="priority-sidebar">
+      <div class="priority-card">
+        <div class="pc-hdr"><div class="ico">&#9888;</div><h4>Priority Consultant Notes</h4></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>Plastic Drain Plug &mdash; Non-Reusable.</strong> The 992 and 991.2 use a single-use plastic drain plug that MUST be replaced at every oil change. Reusing causes leaks. Always stock replacement plugs. <em>Source: 2020 992 SIT</em></p></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>Oil Consumption Up to 1.36 qt/1,000 mi Is Normal.</strong> Porsche publishes this figure in the owner's manual. Set customer expectations proactively &mdash; especially for Turbo and GT3 variants under spirited driving.</p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>PTWA Cylinder Liners &mdash; Visual Only.</strong> The 992's plasma-coated cylinder walls cannot be measured with standard bore gauges. Only visual inspection for scoring is possible. Flag any visible damage immediately. <em>Source: 2020 992 SIT</em></p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>991.2 Timing Chain Tensioner Rattle.</strong> Known cold-start chain rattle on 991 Gen II models. Reduced spring preload in tensioner is the root cause. Document at each service and monitor progression. <em>Source: 2017 991 Gen II SIT</em></p></div>
+        <div class="pi"><div class="dot dot-blue"></div><p><strong>992 Anti-Allergen Cabin Filter.</strong> The 992 is the only 911 with a 3-layer biofunctional anti-allergen cabin filter. This is a premium upsell talking point over aftermarket alternatives.</p></div>
+        <div class="pi"><div class="dot dot-green"></div><p><strong>GT3/GT3 RS Track Use.</strong> Customers using GT3 variants on track should follow motorsport-adjacent intervals: oil every 3,000 mi, brake fluid max 12 months old, wheel bearing inspection per track day log. <em>See also: 718 GT4 RS SIT</em></p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-block" id="m911-issues">
+  <div class="io-section">
+    <h3>&#128269; Issues &amp; Service Opportunities &mdash; 911</h3>
+    <div class="io-grid">
+
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">Single-Use Plastic Oil Drain Plug (992 / 991.2)</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 992 and 991 Gen II both use a single-use plastic oil drain plug that must be replaced at every oil change. Reusing the plug will cause oil leaks. This is a departure from the traditional copper crush washer approach used on earlier 911s.</p>
+    <div class="src">2020 911 992 Carrera S, 4S SIT &mdash; Oil Service Section</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Always include the replacement drain plug in every oil change estimate. Stock these in the parts department &mdash; they are specific to the engine variant. Never allow a used plug to be reinstalled.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">PTWA Cylinder Liner Coating &mdash; No Measurement Allowed</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 992 9A2evo engine uses Plasma Transfer Wire Arc (PTWA) cylinder liner coating instead of traditional liners. This coating cannot be measured with honing or bore gauges. Only visual inspection through the bore scope is permitted.</p>
+    <div class="src">2020 911 992 Carrera S, 4S SIT &mdash; Engine Block</div>
+    <div class="tip"><strong>Consultant Tip:</strong> If any scoring or coating damage is observed during inspection, escalate immediately. This is not a field-repairable condition &mdash; engine block replacement or factory reconditioning may be required.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">991 Gen II Chain Tensioner Cold-Start Rattle</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 991.2 introduced the bi-turbo flat-six to the base Carrera. A known cold-start timing chain rattle exists due to reduced spring preload in the chain tensioner. The timing chain was also lengthened to 146 links vs the prior generation.</p>
+    <div class="src">2017 911 991 Gen II SIT &mdash; Timing Drive Section</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Document the rattle at every service visit with a cold-start observation note. If the rattle duration extends beyond 2&ndash;3 seconds or worsens, recommend tensioner replacement. This is a proactive upsell on high-mileage 991.2 vehicles.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">Piezo Direct Injection at 200 Bar System Pressure</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 992 uses piezo-electric fuel injectors operating at 200 bar system pressure. This is a significantly higher-pressure fuel system than earlier generations and requires approved service tooling for any fuel rail work.</p>
+    <div class="src">2020 911 992 Carrera S, 4S SIT &mdash; Fuel System</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Fuel system diagnostics and injector replacement must be performed with PIWIS and pressure-rated test equipment. Do not attempt manual fuel rail disconnection without depressurizing. This is a key safety and training item for technicians.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-note"></div>
+    <div class="io-title">9A2evo Engine &mdash; 8.0L Oil Capacity</div>
+    <span class="io-sev-label sev-l-note">NOTE</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 992 9A2evo engine holds 8.0 liters of oil with filter change. This is a larger capacity than many customers expect and affects the cost of synthetic oil changes.</p>
+    <div class="src">2020 911 992 Carrera S, 4S SIT &mdash; Technical Data</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Proactively communicate the 8-liter oil capacity when quoting oil changes. This justifies the higher service cost compared to competitors and earlier 911 generations. Use Porsche C40 SAE 0W-40 exclusively.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-opportunity"></div>
+    <div class="io-title">PCCB Brake Inspection Upsell</div>
+    <span class="io-sev-label sev-l-opportunity">OPPORTUNITY</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>Porsche Ceramic Composite Brakes (PCCB) require specialized measurement with the Carboteq device &mdash; standard brake gauges cannot assess ceramic pad wear. Many dealerships skip this, creating liability.</p>
+    <div class="src">2022 718 GT4 RS SIT &mdash; Brake System (applies to all PCCB-equipped 911s)</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Offer PCCB brake health inspection as a standalone service item for all PCCB-equipped 911s. Confirm your shop has the Carboteq measurement device. This differentiates your service center from independents.</div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  </div>
+
+<div class="section-block" id="m911-pricing">
+<div class="price-section">
+  <h3>&#128176; Customer Service Pricing &mdash; 911 (992)</h3>
+  <div class="price-grid">
+    <div class="price-card">
+  <div class="pc-label">10,000 Mile Service</div>
+  <div class="pc-service">Oil &amp; Filter Change + MPI</div>
+  <div class="pc-price">$674.28</div>
+  <div class="pc-detail">Oil change, tire pressure, fluid top-off, brake check, MPI, wash &amp; vac. Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: 91110K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">20,000 Mile Service</div>
+  <div class="pc-service">Oil + Cabin Filter + Brake Flush</div>
+  <div class="pc-price">$1,590.08</div>
+  <div class="pc-detail">Adds cabin air filter, wiper blades, brake system flush. Wait: 4.5 hrs</div>
+  <div class="pc-op">OP Code: 91120K</div><div class="pc-turbo">Turbo: $1,904.10</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">30,000 Mile Service</div>
+  <div class="pc-service">Oil + Spark Plugs</div>
+  <div class="pc-price">$1,516.27</div>
+  <div class="pc-detail">Adds spark plug replacement to 10K service. Wait: 2 hrs (3 for Turbo)</div>
+  <div class="pc-op">OP Code: 91130K</div><div class="pc-turbo">Turbo: $1,626.69</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">40,000 Mile Service</div>
+  <div class="pc-service">Major Maintenance</div>
+  <div class="pc-price">$2,506.56</div>
+  <div class="pc-detail">Full service: oil, cabin filter, wipers, brake flush, engine air filter, spark plugs, drain systems. No waiting</div>
+  <div class="pc-op">OP Code: 91140K</div><div class="pc-turbo">Turbo: $2,692.90</div>
+</div>
+  </div>
+  <div class="price-addons">
+    <h4 style="font-size:13px;margin-bottom:10px;color:var(--p-silver)">Add-On Services</h4>
+    <div class="addon-grid">
+      <div class="addon-item">
+  <div><div class="addon-name">Alignment</div><div class="addon-time">Wait: 3.5 hrs | Labor: 3 hrs</div></div>
+  <div class="addon-price">$259.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Mount &amp; Balance (per tire)</div><div class="addon-time">Wait: 0.25 hrs | Labor: 0.5 hrs</div></div>
+  <div class="addon-price">$55.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Road Force Balance</div></div>
+  <div class="addon-price">$199.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Diagnostic (Generic)</div><div class="addon-time">Wait: 1 hr | Labor: 1 hr</div></div>
+  <div class="addon-price">$230.05</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Front Brakes (Labor Only)</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$299.99</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Rear Brakes (Complete)</div><div class="addon-time">Labor: 2.5 hrs</div></div>
+  <div class="addon-price">$1,473.25</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Spark Plugs (Standalone)</div><div class="addon-time">Labor: 3.5 hrs</div></div>
+  <div class="addon-price">$835.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Transmission Flush</div><div class="addon-time">Labor: 2.5 hrs</div></div>
+  <div class="addon-price">$950.00</div>
+</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="m911-labor">
+<div class="labor-section">
+  <h3>&#128295; OEM Labor Time Units &amp; Parts &mdash; 911</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PSMP Parts and Labor Guide V1.13 &mdash; Warranty labor time units (TU) and required OEM parts per service interval</p>
+  <div class="labor-grid">
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>911 Carrera (992) &mdash; 10K Oil Change</span><span class="tu-badge">118 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Drain Cap (x1)</span><span class="pn">95810380100</span></li>
+<li><span>Sealing Ring (x1)</span><span class="pn">9A711549900</span></li>
+<li><span>Oil Filter Insert (x1)</span><span class="pn">0PB115466</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>911 Carrera (992) &mdash; 20K Intermediate</span><span class="tu-badge">248 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Air Cleaner (Pre-Filter) (x1)</span><span class="pn">99157237100</span></li>
+<li><span>Oil Drain Cap (x1)</span><span class="pn">95810380100</span></li>
+<li><span>Sealing Ring (x1)</span><span class="pn">9A711549900</span></li>
+<li><span>Oil Filter Insert (x1)</span><span class="pn">0PB115466</span></li>
+<li><span>Odor &amp; Allergen Filter (x1)</span><span class="pn">9P1819631</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>911 Carrera S (992) &mdash; 40K Major</span><span class="tu-badge">591&ndash;639 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Air Intake Clamp (x1)</span><span class="pn">9P1129260A</span></li>
+<li><span>Oil Drain Cap (x1)</span><span class="pn">95810380100</span></li>
+<li><span>Sealing Ring (x1)</span><span class="pn">9A711549900</span></li>
+<li><span>Oil Filter Insert (x1)</span><span class="pn">0PB115466</span></li>
+<li><span>Odor &amp; Allergen Filter (x1)</span><span class="pn">9P1819631</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Air Filter Cartridge (x1)</span><span class="pn">9P1129620</span></li>
+<li><span>Tire Sealant (x1)</span><span class="pn">958012619</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>911 Turbo (992) &mdash; 40K Major</span><span class="tu-badge">639 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Drain Cap (x1)</span><span class="pn">95810380100</span></li>
+<li><span>Sealing Ring (x1)</span><span class="pn">9A711549900</span></li>
+<li><span>Oil Filter Insert (x1)</span><span class="pn">0PB115466</span></li>
+<li><span>Odor &amp; Allergen Filter (x1)</span><span class="pn">9P1819631</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Air Filter Cartridge (x1)</span><span class="pn">9P1129620</span></li></ul></div>
+</div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="m911-warranty">
+<div class="warranty-section">
+  <h3>&#128220; Porsche Warranty Reference &mdash; Key Points for Service Consultants</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PCNA Warranty Manual 2025 (V1.0)</p>
+  <div class="war-grid">
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128197;</span><h4>Warranty Periods (PCNA)</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span class="war-label">New Vehicle Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Emissions Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Paint Warranty</span><span class="war-val">4 years (no mileage limit)</span></li>
+          <li><span class="war-label">Corrosion Warranty</span><span class="war-val">12 years (no mileage limit)</span></li>
+          <li><span class="war-label">HV Battery (G2/E3+)</span><span class="war-val">8 years / 100,000 miles</span></li>
+          <li><span class="war-label">HV Battery (Pre-G2)</span><span class="war-val">6 years / 120,000 km</span></li>
+          <li><span class="war-label">Parts Warranty</span><span class="war-val">2 years (no mileage limit)</span></li>
+          <li><span class="war-label">CPO Warranty</span><span class="war-val">2 years / unlimited miles</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9940;</span><h4>Key Warranty Exclusions</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span>Normal wear and tear is NOT covered</span></li>
+          <li><span>Expendable maintenance items (spark plugs, filters, wipers, brakes, clutches, tires) NOT covered unless defect in material/workmanship</span></li>
+          <li><span>Improper repair, maintenance, or care by customer or third party voids coverage for related failures</span></li>
+          <li><span>Non-approved modifications or tuning &mdash; voids coverage unless customer proves parts are equivalent and not the cause</span></li>
+          <li><span>A/C refrigerant charge only first 3 months unless part of warranty repair</span></li>
+          <li><span>Wheel balancing and alignment only first 3 months unless part of warranty repair</span></li>
+          <li><span>Improper fuel, lubricant, or fluid use</span></li>
+          <li><span>Rodent damage is excluded</span></li>
+          <li><span>Overspeed events void engine/drivetrain coverage</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Critical:</strong> All service intervals MUST be completed per Porsche AG requirements as a precondition for ANY warranty claim. Missed services = denied claims.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128221;</span><h4>Claim Submission Rules</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>15-Day Rule:</strong> Claims must be submitted within 15 days of the technician's last time punch</span></li>
+          <li><span><strong>Repair Over Replace:</strong> Repair must be given precedence over replacement unless repair costs more</span></li>
+          <li><span><strong>Exchange Parts Required:</strong> Factory exchange parts must be used on any part listed in PET with an exchange number</span></li>
+          <li><span><strong>PCSS Documentation:</strong> All repairs must be fully documented in PCSS for quality analysis</span></li>
+          <li><span><strong>Warranty Type 111:</strong> Use for all New Vehicle Warranty claims</span></li>
+          <li><span><strong>Warranty Type 1E1:</strong> Use for Emission Warranty claims after NVW expires</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9889;</span><h4>EV / Hybrid Battery Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>BEV Battery Capacity:</strong> Warranty case if net capacity drops below threshold during warranty period</span></li>
+          <li><span><strong>Measurement:</strong> Must be performed at an authorized Porsche Center via PIWIS</span></li>
+          <li><span><strong>Exclusions:</strong> Battery removed from vehicle and opened improperly, or charging/care instructions not followed</span></li>
+          <li><span><strong>Charging Equipment:</strong> If ordered as I-Option, claim under NVW. If Tequipment, claim as Parts Warranty</span></li>
+          <li><span><strong>Dealer DC Charge Box:</strong> 8-year warranty period</span></li>
+          <li><span><strong>AC Wall Box:</strong> Covered under standard warranty terms</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Consultant Note:</strong> Battery capacity measurements are a key customer touchpoint. Proactively offer annual capacity checks to EV customers &mdash; this builds trust and catches warranty-eligible degradation early.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#127912;</span><h4>Paint &amp; Corrosion Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Paint:</strong> 4 years, no mileage limit &mdash; covers defects in paint application</span></li>
+          <li><span><strong>Corrosion:</strong> 12 years, no mileage limit &mdash; covers perforation corrosion (rust-through)</span></li>
+          <li><span><strong>Exclusions:</strong> Stone chip damage, environmental damage, chemical contamination, improper care, aftermarket paint</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128736;</span><h4>Goodwill &amp; Special Cases</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Goodwill:</strong> Available for out-of-warranty repairs at PCNA discretion &mdash; submit via PRMS</span></li>
+          <li><span><strong>CPO 111-Point Check:</strong> Required for Certified Pre-Owned warranty activation</span></li>
+          <li><span><strong>Consequential Damage after Campaigns:</strong> Covered if damage resulted from the campaign condition</span></li>
+          <li><span><strong>Trickle Charging:</strong> Required for vehicles in inventory &mdash; battery damage from discharged state may not be covered</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+
+<div id="m718" class="panel">
+  <div class="model-hdr">
+    <h2><span>718</span> Boxster &bull; Cayman &bull; GTS &bull; GT4 &bull; GT4 RS &bull; Spyder</h2>
+    <p>982 (2017&ndash;Present) &nbsp;|&nbsp; 981 (2013&ndash;2016) &nbsp;|&nbsp; 987 (2005&ndash;2012) &nbsp;|&nbsp; 986 (1997&ndash;2004)</p>
+    <div class="badges">
+      <span class="badge badge-ice">4-Cyl Turbo (718)</span>
+      <span class="badge badge-ice">Flat-6 NA (GT4/GT4 RS/Spyder)</span>
+      <span class="badge badge-sport">Mid-Engine Platform</span>
+    </div>
+  </div>
+  <div class="ss-banner">
+    <div class="ico">&#127937;</div>
+    <div><strong>GT4 RS / Spyder Motorsport Note:</strong> Vehicles used on track have dramatically shortened service intervals. Oil every 3,000 mi, brake fluid must be under 12 months old, wheel bearings at 6,000&ndash;12,000 mi, central lock bolts every 6,000 mi. Always ask about track use. <em>Source: 2022 718 GT4 RS SIT</em></div>
+  </div>
+
+  <div class="section-block active" id="m718-maint">
+  <div class="content-grid">
+    <div>
+      <table class="itbl">
+        <thead><tr><th style="width:40%">Service Item</th><th style="width:25%">Interval</th><th>Notes</th></tr></thead>
+        <tbody>
+
+<tr class="sec-row"><td colspan="3">&#9660; Engine &amp; Lubrication</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Engine Oil &amp; Filter</div><div class="svc-desc">4-cyl turbo (base 718) / Flat-6 NA (GT4, Spyder, GT4 RS)</div></td>
+  <td><span class="ibadge ib-annual">1 Year / 10,000 mi</span></td>
+  <td><span class="pill pill-blue">Smart Service</span></td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Engine Oil &amp; Filter (Track Use)</div><div class="svc-desc">GT4 RS &amp; Spyder track interval &mdash; per SIT</div></td>
+  <td><span class="ibadge ib-every">Every 3,000 mi (race use)</span></td>
+  <td><span class="pill pill-red">MOTORSPORT</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Spark Plugs</div><div class="svc-desc">4 plugs (718 base) / 6 plugs (GT4, Spyder)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Air Filter (Engine)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Fluids</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Brake Fluid</div><div class="svc-desc">BASF Hydraulan 404; max 12 months for track use</div></td>
+  <td><span class="ibadge ib-biennial">Every 2 Years</span></td>
+  <td><span class="pill pill-red">Mandatory</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Coolant</div><div class="svc-desc">Glysantin G40</div></td>
+  <td><span class="ibadge ib-quad">Inspect 2 yrs / Change 4&ndash;6 yrs</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Drivetrain</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">PDK / Manual Transmission Fluid</div><div class="svc-desc">PDK or 6-speed manual gearbox oil</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Rear Differential / Limited-Slip</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Motorsport-Specific (GT4 RS / Track Use)</td></tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Wheel Bearings &mdash; Front</div><div class="svc-desc">Track use: replace every 6,000 mi race use</div></td>
+  <td><span class="ibadge ib-every">6,000 mi Race Use</span></td>
+  <td><span class="pill pill-red">GT4 RS SIT</span></td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Wheel Bearings &mdash; Rear</div><div class="svc-desc">Track use: replace every 12,000 mi race use</div></td>
+  <td><span class="ibadge ib-every">12,000 mi Race Use</span></td>
+  <td><span class="pill pill-red">GT4 RS SIT</span></td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Central Wheel Lock Bolts</div><div class="svc-desc">Replace after 6,000 mi of race use</div></td>
+  <td><span class="ibadge ib-every">6,000 mi Race Use</span></td>
+  <td><span class="pill pill-amber">GT4 RS SIT</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Filters, Safety &amp; Wear</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Cabin / Pollen Filter</div></td>
+  <td><span class="ibadge ib-biennial">2 Years / 20,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-seasonal">
+  <td><div class="svc-name">Wiper Blades</div></td>
+  <td><span class="ibadge ib-seasonal">Twice Per Year</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Brake Pads &amp; Rotors</div><div class="svc-desc">PCCB: Carboteq device required for measurement</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="priority-sidebar">
+      <div class="priority-card">
+        <div class="pc-hdr"><div class="ico">&#9888;</div><h4>Priority Consultant Notes</h4></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>ALWAYS Ask About Track Use.</strong> The GT4 RS, GT4, and Spyder are frequently tracked. Standard 10,000 mi oil interval does NOT apply under race conditions &mdash; SIT specifies 3,000 mi. This single question can prevent catastrophic engine damage claims.</p></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>PCCB Requires Carboteq Device.</strong> Standard brake gauges cannot measure ceramic composite brake wear. If your facility lacks a Carboteq device, do not quote PCCB brake inspection. <em>Source: 2022 GT4 RS SIT</em></p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>986/987 IMS Bearing History.</strong> Older Boxster/Cayman models (986, early 987) have the well-known intermediate shaft bearing failure risk. IMS Solution or LN Engineering upgrade is a key upsell for pre-purchase inspections and proactive maintenance.</p></div>
+        <div class="pi"><div class="dot dot-blue"></div><p><strong>Central Lock Bolt Replacement.</strong> GT4 RS with center-lock wheels requires bolt replacement every 6,000 mi under race use. These bolts are single-torque-spec items and fatigue over time. <em>Source: 2022 GT4 RS SIT</em></p></div>
+        <div class="pi"><div class="dot dot-green"></div><p><strong>718 Base 4-Cyl vs GT4 Flat-6.</strong> The base 718 uses a 2.0T/2.5T four-cylinder while the GT4/Spyder/GT4 RS use the naturally aspirated 4.0 flat-six. Service complexity, oil capacity, and parts pricing differ significantly between these engine families.</p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-block" id="m718-issues">
+  <div class="io-section">
+    <h3>&#128269; Issues &amp; Service Opportunities &mdash; 718</h3>
+    <div class="io-grid">
+
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">GT4 RS Race Oil Change Interval: 3,000 Miles</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2022 718 GT4 RS SIT explicitly specifies a 3,000-mile oil change interval for vehicles used in race/track conditions. The standard 10,000-mile annual interval does not apply. Failure to follow the shortened interval under track conditions can lead to accelerated engine wear and voided warranty claims.</p>
+    <div class="src">2022 718 Cayman GT4 RS SIT &mdash; Motorsport Service Schedule</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Ask every GT4 RS and GT4 customer about track frequency at check-in. Create a dedicated motorsport service package that bundles oil change, brake fluid, and visual inspection at the 3,000-mile interval.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">PCCB Brake Wear &mdash; Carboteq Device Required</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>Porsche Ceramic Composite Brakes cannot be measured with conventional pad wear tools. The Carboteq measurement device is the only approved method for assessing ceramic brake pad remaining life. Quoting brake work without this device creates liability.</p>
+    <div class="src">2022 718 GT4 RS SIT &mdash; Brake System Measurement</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Confirm your service center has a Carboteq device before accepting PCCB-equipped vehicles for brake inspection. This is a competitive differentiator &mdash; many independent shops cannot perform this service.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">Brake Fluid Max 12 Months for Track Use</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>For vehicles used on track, brake fluid must be less than 12 months old regardless of the standard 2-year interval. High-temperature track braking degrades fluid rapidly. The SIT is explicit about this shortened interval.</p>
+    <div class="src">2022 718 GT4 RS SIT &mdash; Brake Fluid Requirements</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Include brake fluid age verification in every track-use service appointment. If fluid is over 12 months old and the customer tracks the car, recommend immediate replacement before the next event.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">Wheel Bearing Replacement Under Race Use</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>Front wheel bearings should be replaced every 6,000 miles and rear bearings every 12,000 miles under race conditions per the GT4 RS SIT. These are not inspect-and-replace items for track cars &mdash; they are scheduled replacement items.</p>
+    <div class="src">2022 718 GT4 RS SIT &mdash; Chassis / Wheel Bearings</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Build wheel bearing replacement into the motorsport service schedule. Proactively quote these at the appropriate mileage thresholds. Track customers who log their events may self-report, but many do not.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-note"></div>
+    <div class="io-title">986/987 Intermediate Shaft (IMS) Bearing</div>
+    <span class="io-sev-label sev-l-note">NOTE</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 986 Boxster and early 987 Boxster/Cayman are known for intermediate shaft bearing failures that can destroy the engine. Third-party upgraded bearings (IMS Solution, LN Engineering) are a well-established preventive upgrade.</p>
+    <div class="src">General &mdash; 986/987 Known Issue (widely documented)</div>
+    <div class="tip"><strong>Consultant Tip:</strong> This is the #1 upsell for any pre-purchase inspection on a 986 or early 987. Recommend the IMS bearing upgrade as a peace-of-mind service. Customers researching these cars already know about IMS &mdash; offering the solution builds trust.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-opportunity"></div>
+    <div class="io-title">Motorsport Service Package</div>
+    <span class="io-sev-label sev-l-opportunity">OPPORTUNITY</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The GT4 RS SIT documents a comprehensive set of shortened intervals for track use covering oil, brake fluid, wheel bearings, wheel bolts, and visual inspections. This creates an opportunity to build a bundled motorsport service package.</p>
+    <div class="src">2022 718 GT4 RS SIT &mdash; Complete Motorsport Schedule</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Create a tiered motorsport service menu: Bronze (oil + inspection), Silver (oil + brake fluid + inspection), Gold (full SIT-recommended race service). Market directly to GT4 RS, GT4, and Spyder owners.</div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  </div>
+
+<div class="section-block" id="m718-pricing">
+<div class="price-section">
+  <h3>&#128176; Customer Service Pricing &mdash; 718 (982)</h3>
+  <div class="price-grid">
+    <div class="price-card">
+  <div class="pc-label">10,000 Mile Service</div>
+  <div class="pc-service">Oil &amp; Filter Change + MPI</div>
+  <div class="pc-price">$719.14</div>
+  <div class="pc-detail">Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: Box10K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">20,000 Mile Service</div>
+  <div class="pc-service">Oil + Cabin Filter + Brake Flush</div>
+  <div class="pc-price">$1,617.69</div>
+  <div class="pc-detail">Wait: 4 hrs</div>
+  <div class="pc-op">OP Code: Box20K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">30,000 Mile Service</div>
+  <div class="pc-service">Oil + Spark Plugs</div>
+  <div class="pc-price">$1,095.27</div>
+  <div class="pc-detail">Wait: 2 hrs (3 for Turbo)</div>
+  <div class="pc-op">OP Code: Box30K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">40,000 Mile Service</div>
+  <div class="pc-service">Major Maintenance</div>
+  <div class="pc-price">$2,613.53</div>
+  <div class="pc-detail">Full service. No waiting</div>
+  <div class="pc-op">OP Code: Box40K</div>
+</div>
+  </div>
+  <div class="price-addons">
+    <h4 style="font-size:13px;margin-bottom:10px;color:var(--p-silver)">Add-On Services</h4>
+    <div class="addon-grid">
+      <div class="addon-item">
+  <div><div class="addon-name">Alignment</div><div class="addon-time">Wait: 3 hrs | Labor: 2 hrs</div></div>
+  <div class="addon-price">$289.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Mount &amp; Balance (per tire)</div><div class="addon-time">Wait: 0.25 hrs | Labor: 0.5 hrs</div></div>
+  <div class="addon-price">$55.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Road Force Balance</div></div>
+  <div class="addon-price">$199.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Diagnostic (Generic)</div><div class="addon-time">Wait: 1 hr | Labor: 1 hr</div></div>
+  <div class="addon-price">$230.05</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Front Brakes (Labor Only)</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$299.99</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Rear Brakes (Labor Only)</div><div class="addon-time">Labor: 2.5 hrs</div></div>
+  <div class="addon-price">$375.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">PDK Flush</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$710.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Spark Plugs</div></div>
+  <div class="addon-price">$835.00</div>
+</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="m718-labor">
+<div class="labor-section">
+  <h3>&#128295; OEM Labor Time Units &amp; Parts &mdash; 718</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PSMP Parts and Labor Guide V1.13</p>
+  <div class="labor-grid">
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>718 Cayman Base (982) &mdash; 10K Oil Change</span><span class="tu-badge">125 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Filter Element (x1)</span><span class="pn">0PC115466</span></li>
+<li><span>Seal Ring (x1)</span><span class="pn">90012310630</span></li>
+<li><span>O-ring Oil Filter (x1)</span><span class="pn">99970768540</span></li>
+<li><span>Air Intake Pre-Filter (x1)</span><span class="pn">99157237100</span></li>
+<li><span>Passenger Compartment Filter (x1)</span><span class="pn">9P1819631</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>718 Cayman Base (982) &mdash; 40K Major</span><span class="tu-badge">307+ TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Filter Element (x1)</span><span class="pn">0PC115466</span></li>
+<li><span>Seal Ring (x1)</span><span class="pn">90012310630</span></li>
+<li><span>O-ring Oil Filter (x1)</span><span class="pn">99970768540</span></li>
+<li><span>Air Filter Cartridge (x1)</span><span class="pn">982129620B</span></li>
+<li><span>Passenger Compartment Filter (x1)</span><span class="pn">9P1819631</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Tire Sealant (x1)</span><span class="pn">958012619</span></li></ul></div>
+</div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="m718-warranty">
+<div class="warranty-section">
+  <h3>&#128220; Porsche Warranty Reference &mdash; Key Points for Service Consultants</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PCNA Warranty Manual 2025 (V1.0)</p>
+  <div class="war-grid">
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128197;</span><h4>Warranty Periods (PCNA)</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span class="war-label">New Vehicle Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Emissions Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Paint Warranty</span><span class="war-val">4 years (no mileage limit)</span></li>
+          <li><span class="war-label">Corrosion Warranty</span><span class="war-val">12 years (no mileage limit)</span></li>
+          <li><span class="war-label">HV Battery (G2/E3+)</span><span class="war-val">8 years / 100,000 miles</span></li>
+          <li><span class="war-label">HV Battery (Pre-G2)</span><span class="war-val">6 years / 120,000 km</span></li>
+          <li><span class="war-label">Parts Warranty</span><span class="war-val">2 years (no mileage limit)</span></li>
+          <li><span class="war-label">CPO Warranty</span><span class="war-val">2 years / unlimited miles</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9940;</span><h4>Key Warranty Exclusions</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span>Normal wear and tear is NOT covered</span></li>
+          <li><span>Expendable maintenance items (spark plugs, filters, wipers, brakes, clutches, tires) NOT covered unless defect in material/workmanship</span></li>
+          <li><span>Improper repair, maintenance, or care by customer or third party voids coverage for related failures</span></li>
+          <li><span>Non-approved modifications or tuning &mdash; voids coverage unless customer proves parts are equivalent and not the cause</span></li>
+          <li><span>A/C refrigerant charge only first 3 months unless part of warranty repair</span></li>
+          <li><span>Wheel balancing and alignment only first 3 months unless part of warranty repair</span></li>
+          <li><span>Improper fuel, lubricant, or fluid use</span></li>
+          <li><span>Rodent damage is excluded</span></li>
+          <li><span>Overspeed events void engine/drivetrain coverage</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Critical:</strong> All service intervals MUST be completed per Porsche AG requirements as a precondition for ANY warranty claim. Missed services = denied claims.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128221;</span><h4>Claim Submission Rules</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>15-Day Rule:</strong> Claims must be submitted within 15 days of the technician's last time punch</span></li>
+          <li><span><strong>Repair Over Replace:</strong> Repair must be given precedence over replacement unless repair costs more</span></li>
+          <li><span><strong>Exchange Parts Required:</strong> Factory exchange parts must be used on any part listed in PET with an exchange number</span></li>
+          <li><span><strong>PCSS Documentation:</strong> All repairs must be fully documented in PCSS for quality analysis</span></li>
+          <li><span><strong>Warranty Type 111:</strong> Use for all New Vehicle Warranty claims</span></li>
+          <li><span><strong>Warranty Type 1E1:</strong> Use for Emission Warranty claims after NVW expires</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9889;</span><h4>EV / Hybrid Battery Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>BEV Battery Capacity:</strong> Warranty case if net capacity drops below threshold during warranty period</span></li>
+          <li><span><strong>Measurement:</strong> Must be performed at an authorized Porsche Center via PIWIS</span></li>
+          <li><span><strong>Exclusions:</strong> Battery removed from vehicle and opened improperly, or charging/care instructions not followed</span></li>
+          <li><span><strong>Charging Equipment:</strong> If ordered as I-Option, claim under NVW. If Tequipment, claim as Parts Warranty</span></li>
+          <li><span><strong>Dealer DC Charge Box:</strong> 8-year warranty period</span></li>
+          <li><span><strong>AC Wall Box:</strong> Covered under standard warranty terms</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Consultant Note:</strong> Battery capacity measurements are a key customer touchpoint. Proactively offer annual capacity checks to EV customers &mdash; this builds trust and catches warranty-eligible degradation early.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#127912;</span><h4>Paint &amp; Corrosion Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Paint:</strong> 4 years, no mileage limit &mdash; covers defects in paint application</span></li>
+          <li><span><strong>Corrosion:</strong> 12 years, no mileage limit &mdash; covers perforation corrosion (rust-through)</span></li>
+          <li><span><strong>Exclusions:</strong> Stone chip damage, environmental damage, chemical contamination, improper care, aftermarket paint</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128736;</span><h4>Goodwill &amp; Special Cases</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Goodwill:</strong> Available for out-of-warranty repairs at PCNA discretion &mdash; submit via PRMS</span></li>
+          <li><span><strong>CPO 111-Point Check:</strong> Required for Certified Pre-Owned warranty activation</span></li>
+          <li><span><strong>Consequential Damage after Campaigns:</strong> Covered if damage resulted from the campaign condition</span></li>
+          <li><span><strong>Trickle Charging:</strong> Required for vehicles in inventory &mdash; battery damage from discharged state may not be covered</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+
+<div id="mcay" class="panel">
+  <div class="model-hdr">
+    <h2><span>Cayenne</span> &bull; Cayenne S &bull; GTS &bull; Turbo &bull; Turbo GT &bull; E-Hybrid</h2>
+    <p>9YA Facelift (2024&ndash;Present) &nbsp;|&nbsp; 9YA (2019&ndash;2023) &nbsp;|&nbsp; 92A (2011&ndash;2018) &nbsp;|&nbsp; 9PA (2003&ndash;2010)</p>
+    <div class="badges">
+      <span class="badge badge-ice">V6 Turbo / V8 Biturbo</span>
+      <span class="badge badge-hybrid">E-Hybrid PHEV</span>
+      <span class="badge badge-suv">Full-Size Performance SUV</span>
+    </div>
+  </div>
+  <div class="ss-banner">
+    <div class="ico">&#9889;</div>
+    <div><strong>2024 Cayenne Major Update:</strong> The 2024 facelift eliminates the vacuum brake booster system entirely. E-wastegates replace mechanical wastegates. New 2-chamber air springs and HD Matrix LEDs are introduced. E-Hybrid range increased to 83 km EV. Service procedures differ significantly from pre-2024. <em>Source: 2024 Cayenne 9YA SIT</em></div>
+  </div>
+
+  <div class="section-block active" id="mcay-maint">
+  <div class="content-grid">
+    <div>
+      <table class="itbl">
+        <thead><tr><th style="width:40%">Service Item</th><th style="width:25%">Interval</th><th>Notes</th></tr></thead>
+        <tbody>
+
+<tr class="sec-row"><td colspan="3">&#9660; Engine &amp; Lubrication</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Engine Oil &amp; Filter</div><div class="svc-desc">V6 Turbo &amp; V8 Biturbo &mdash; larger sump capacity</div></td>
+  <td><span class="ibadge ib-annual">1 Year / 10,000 mi</span></td>
+  <td><span class="pill pill-blue">Smart Service</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Spark Plugs</div><div class="svc-desc">V6: 6 plugs | V8: 8 plugs (higher labor)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Air Filter (Engine)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Fluids &amp; Cooling</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Brake Fluid</div><div class="svc-desc">BASF Hydraulan 404</div></td>
+  <td><span class="ibadge ib-biennial">Every 2 Years</span></td>
+  <td><span class="pill pill-red">Mandatory</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Coolant</div><div class="svc-desc">Glysantin G40; Hybrid has separate HV coolant circuit</div></td>
+  <td><span class="ibadge ib-quad">Inspect 2 yrs / Change 4&ndash;6 yrs</span></td>
+  <td><span class="pill pill-amber">Hybrid: 2 circuits</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Drivetrain &amp; Transmission</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">8-Speed PDK / Tiptronic Fluid</div><div class="svc-desc">Including torque converter where applicable</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-amber">Often Missed</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Transfer Case Fluid (PTM)</div><div class="svc-desc">Porsche Traction Management AWD</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Front &amp; Rear Differential Fluid</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Hybrid-Specific (E-Hybrid)</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">HV Battery Inspection</div><div class="svc-desc">Capacity / BMS check via PIWIS</div></td>
+  <td><span class="ibadge ib-annual">Annually</span></td>
+  <td><span class="pill pill-purple">E-Hybrid Only</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">HV Cooling Circuit Fluid</div><div class="svc-desc">Separate from engine coolant circuit</div></td>
+  <td><span class="ibadge ib-quad">4&ndash;6 Years per PIWIS</span></td>
+  <td><span class="pill pill-purple">E-Hybrid Only</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Filters, Safety &amp; Wear</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Cabin / Pollen Filter</div></td>
+  <td><span class="ibadge ib-biennial">2 Years / 20,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-seasonal">
+  <td><div class="svc-name">Wiper Blades</div></td>
+  <td><span class="ibadge ib-seasonal">Twice Per Year</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Brake Pads &amp; Rotors</div><div class="svc-desc">PCCB optional on Turbo; higher wear from vehicle weight</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Air Suspension (PASM / PDCC)</div><div class="svc-desc">Where equipped &mdash; check for leaks; 2024+ 2-chamber springs</div></td>
+  <td><span class="ibadge ib-annual">Inspect Annually</span></td>
+  <td>&mdash;</td>
+</tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="priority-sidebar">
+      <div class="priority-card">
+        <div class="pc-hdr"><div class="ico">&#9888;</div><h4>Priority Consultant Notes</h4></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>2024+ Vacuum System Eliminated.</strong> No vacuum brake booster on the 2024 facelift. Brake bleeding procedure is completely different. Ensure technicians are trained on the new electric brake booster system before servicing. <em>Source: 2024 Cayenne SIT</em></p></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>AWD = More Fluid Services.</strong> Transfer case, front differential, and rear differential all require separate fluid changes. Bundle these together to maximize service value and prevent customer sticker shock.</p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>V8 Spark Plugs Are Labor-Intensive.</strong> The V8 Biturbo requires 8 plugs with limited access. Set cost expectations clearly &mdash; this is a significant labor job.</p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>E-Hybrid HV Coolant Circuit.</strong> Completely separate cooling circuit for the battery pack and e-motor. Often missed during standard coolant service. Both circuits need individual attention.</p></div>
+        <div class="pi"><div class="dot dot-blue"></div><p><strong>2024 2-Chamber Air Springs.</strong> New design with different failure modes vs single-chamber. Visual and leak inspection procedure has been updated. <em>Source: 2024 Cayenne SIT</em></p></div>
+        <div class="pi"><div class="dot dot-green"></div><p><strong>E-Hybrid 83 km EV Range.</strong> The 2024 Cayenne E-Hybrid has a significantly improved EV range &mdash; great talking point for customers concerned about fuel economy and for trade-in discussions.</p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-block" id="mcay-issues">
+  <div class="io-section">
+    <h3>&#128269; Issues &amp; Service Opportunities &mdash; Cayenne</h3>
+    <div class="io-grid">
+
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">2024+ Vacuum Brake Booster System Eliminated</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2024 Cayenne facelift completely removes the vacuum brake booster. An electric brake booster (EBB) is now standard. This fundamentally changes the brake bleeding and diagnostic procedure. Traditional vacuum-based bleed equipment will not work.</p>
+    <div class="src">2024 Cayenne 9YA SIT &mdash; Brake System Architecture</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Verify technician training on the electric brake booster system before accepting 2024+ Cayenne for brake service. Update SOP documentation and ensure PIWIS-guided bleeding is the standard procedure.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">Electronic Wastegates (E-Wastegates)</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2024 Cayenne replaces mechanical wastegates with electronically actuated wastegates. There is no manual adjustment capability. All wastegate diagnostics must be performed via PIWIS. Mechanical wastegate knowledge does not transfer.</p>
+    <div class="src">2024 Cayenne 9YA SIT &mdash; Turbocharger System</div>
+    <div class="tip"><strong>Consultant Tip:</strong> If a customer reports boost or turbo-related concerns on a 2024+ Cayenne, do not attempt manual wastegate inspection. Route directly to PIWIS diagnostics. Wastegate actuator faults may present as drivability complaints.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">2-Chamber Air Spring Design (2024+)</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2024 Cayenne introduces a new 2-chamber air spring design replacing the previous single-chamber units. Failure signatures, leak patterns, and replacement procedures differ from earlier models.</p>
+    <div class="src">2024 Cayenne 9YA SIT &mdash; Suspension / Air Springs</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Update air suspension inspection checklist for 2024+ models. The 2-chamber design has different compressor load characteristics. Monitor for new failure patterns as these vehicles age.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-opportunity"></div>
+    <div class="io-title">E-Hybrid 83 km EV Range Selling Point</div>
+    <span class="io-sev-label sev-l-opportunity">OPPORTUNITY</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2024 Cayenne E-Hybrid achieves 83 km of pure electric range &mdash; a significant improvement over prior generations. This is a strong selling point for service-to-sales handoffs and trade-in discussions.</p>
+    <div class="src">2024 Cayenne 9YA SIT &mdash; E-Hybrid Technical Data</div>
+    <div class="tip"><strong>Consultant Tip:</strong> When servicing older Cayenne E-Hybrids, mention the improved EV range of the 2024 model during checkout. This supports trade-in conversations and demonstrates product knowledge that builds customer loyalty.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-note"></div>
+    <div class="io-title">HD Matrix LED Headlights</div>
+    <span class="io-sev-label sev-l-note">NOTE</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2024 Cayenne introduces HD Matrix LED headlights with advanced beam control. These require PIWIS calibration after windshield replacement or front-end collision repair. Improper calibration can cause glare issues.</p>
+    <div class="src">2024 Cayenne 9YA SIT &mdash; Lighting System</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Add headlight calibration to the post-repair checklist for any 2024+ Cayenne that has windshield work or front body repair. ADAS calibration and LED matrix calibration are separate procedures.</div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  </div>
+
+<div class="section-block" id="mcay-pricing">
+<div class="price-section">
+  <h3>&#128176; Customer Service Pricing &mdash; Cayenne (E3 / 9YA)</h3>
+  <div class="price-grid">
+    <div class="price-card">
+  <div class="pc-label">10,000 Mile Service</div>
+  <div class="pc-service">Oil &amp; Filter Change + MPI</div>
+  <div class="pc-price">$715.13</div>
+  <div class="pc-detail">Base / Hybrid. Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: E310K</div><div class="pc-turbo">Turbo: $728.93</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">20,000 Mile Service</div>
+  <div class="pc-service">Oil + Cabin Filter + Brake Flush</div>
+  <div class="pc-price">$1,714.87</div>
+  <div class="pc-detail">Base / Hybrid. Wait: 5 hrs</div>
+  <div class="pc-op">OP Code: E320K</div><div class="pc-turbo">Turbo: $1,726.37</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">30,000 Mile Service</div>
+  <div class="pc-service">Oil + Spark Plugs</div>
+  <div class="pc-price">$1,993.06</div>
+  <div class="pc-detail">Base. Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: E330K</div><div class="pc-turbo">Turbo: $2,303.63</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">40,000 Mile Service</div>
+  <div class="pc-service">Major Maintenance</div>
+  <div class="pc-price">$2,135.85</div>
+  <div class="pc-detail">Base / Hybrid. No waiting</div>
+  <div class="pc-op">OP Code: E340K</div><div class="pc-turbo">Turbo: $2,147.36</div>
+</div>
+  </div>
+  <div class="price-addons">
+    <h4 style="font-size:13px;margin-bottom:10px;color:var(--p-silver)">Add-On Services</h4>
+    <div class="addon-grid">
+      <div class="addon-item">
+  <div><div class="addon-name">Alignment</div><div class="addon-time">Wait: 3 hrs | Labor: 2 hrs</div></div>
+  <div class="addon-price">$289.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Mount &amp; Balance (per tire)</div></div>
+  <div class="addon-price">$55.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Road Force Balance</div></div>
+  <div class="addon-price">$199.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Diagnostic (Generic)</div><div class="addon-time">Wait: 1 hr</div></div>
+  <div class="addon-price">$230.05</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Front Brakes (Labor Only)</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$299.99</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Rear Brakes (Labor Only)</div><div class="addon-time">Labor: 2.5 hrs</div></div>
+  <div class="addon-price">$375.00</div>
+</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mcay-labor">
+<div class="labor-section">
+  <h3>&#128295; OEM Labor Time Units &amp; Parts &mdash; Cayenne</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PSMP Parts and Labor Guide V1.13</p>
+  <div class="labor-grid">
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Cayenne E3 Base &mdash; 10K Oil Change</span><span class="tu-badge">130 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Filter Elem &amp; Sealing Ring (x1)</span><span class="pn">9A719840500</span></li>
+<li><span>Seal Ring (x1)</span><span class="pn">PAF013849</span></li>
+<li><span>Hexagon Socket Head Bolt (x3)</span><span class="pn">PAF00072900</span></li>
+<li><span>Particle Filter (x1)</span><span class="pn">PAB81943900</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Cayenne E3 &mdash; 40K Major</span><span class="tu-badge">382 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Filter Elem &amp; Sealing Ring (x1)</span><span class="pn">9A719840500</span></li>
+<li><span>Seal Ring (x1)</span><span class="pn">PAF013849</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Particle Filter (x1)</span><span class="pn">PAB81943900</span></li>
+<li><span>Transfer Gear Fluid (x0.6)</span><span class="pn">4330563</span></li>
+<li><span>Transfer Oil Drain Plug (x3)</span><span class="pn">95530111501</span></li>
+<li><span>Temperature Sensor (x1)</span><span class="pn">992907527A</span></li>
+<li><span>Air Filter Element (x1)</span><span class="pn">PAB133843A</span></li></ul></div>
+</div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mcay-warranty">
+<div class="warranty-section">
+  <h3>&#128220; Porsche Warranty Reference &mdash; Key Points for Service Consultants</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PCNA Warranty Manual 2025 (V1.0)</p>
+  <div class="war-grid">
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128197;</span><h4>Warranty Periods (PCNA)</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span class="war-label">New Vehicle Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Emissions Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Paint Warranty</span><span class="war-val">4 years (no mileage limit)</span></li>
+          <li><span class="war-label">Corrosion Warranty</span><span class="war-val">12 years (no mileage limit)</span></li>
+          <li><span class="war-label">HV Battery (G2/E3+)</span><span class="war-val">8 years / 100,000 miles</span></li>
+          <li><span class="war-label">HV Battery (Pre-G2)</span><span class="war-val">6 years / 120,000 km</span></li>
+          <li><span class="war-label">Parts Warranty</span><span class="war-val">2 years (no mileage limit)</span></li>
+          <li><span class="war-label">CPO Warranty</span><span class="war-val">2 years / unlimited miles</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9940;</span><h4>Key Warranty Exclusions</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span>Normal wear and tear is NOT covered</span></li>
+          <li><span>Expendable maintenance items (spark plugs, filters, wipers, brakes, clutches, tires) NOT covered unless defect in material/workmanship</span></li>
+          <li><span>Improper repair, maintenance, or care by customer or third party voids coverage for related failures</span></li>
+          <li><span>Non-approved modifications or tuning &mdash; voids coverage unless customer proves parts are equivalent and not the cause</span></li>
+          <li><span>A/C refrigerant charge only first 3 months unless part of warranty repair</span></li>
+          <li><span>Wheel balancing and alignment only first 3 months unless part of warranty repair</span></li>
+          <li><span>Improper fuel, lubricant, or fluid use</span></li>
+          <li><span>Rodent damage is excluded</span></li>
+          <li><span>Overspeed events void engine/drivetrain coverage</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Critical:</strong> All service intervals MUST be completed per Porsche AG requirements as a precondition for ANY warranty claim. Missed services = denied claims.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128221;</span><h4>Claim Submission Rules</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>15-Day Rule:</strong> Claims must be submitted within 15 days of the technician's last time punch</span></li>
+          <li><span><strong>Repair Over Replace:</strong> Repair must be given precedence over replacement unless repair costs more</span></li>
+          <li><span><strong>Exchange Parts Required:</strong> Factory exchange parts must be used on any part listed in PET with an exchange number</span></li>
+          <li><span><strong>PCSS Documentation:</strong> All repairs must be fully documented in PCSS for quality analysis</span></li>
+          <li><span><strong>Warranty Type 111:</strong> Use for all New Vehicle Warranty claims</span></li>
+          <li><span><strong>Warranty Type 1E1:</strong> Use for Emission Warranty claims after NVW expires</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9889;</span><h4>EV / Hybrid Battery Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>BEV Battery Capacity:</strong> Warranty case if net capacity drops below threshold during warranty period</span></li>
+          <li><span><strong>Measurement:</strong> Must be performed at an authorized Porsche Center via PIWIS</span></li>
+          <li><span><strong>Exclusions:</strong> Battery removed from vehicle and opened improperly, or charging/care instructions not followed</span></li>
+          <li><span><strong>Charging Equipment:</strong> If ordered as I-Option, claim under NVW. If Tequipment, claim as Parts Warranty</span></li>
+          <li><span><strong>Dealer DC Charge Box:</strong> 8-year warranty period</span></li>
+          <li><span><strong>AC Wall Box:</strong> Covered under standard warranty terms</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Consultant Note:</strong> Battery capacity measurements are a key customer touchpoint. Proactively offer annual capacity checks to EV customers &mdash; this builds trust and catches warranty-eligible degradation early.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#127912;</span><h4>Paint &amp; Corrosion Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Paint:</strong> 4 years, no mileage limit &mdash; covers defects in paint application</span></li>
+          <li><span><strong>Corrosion:</strong> 12 years, no mileage limit &mdash; covers perforation corrosion (rust-through)</span></li>
+          <li><span><strong>Exclusions:</strong> Stone chip damage, environmental damage, chemical contamination, improper care, aftermarket paint</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128736;</span><h4>Goodwill &amp; Special Cases</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Goodwill:</strong> Available for out-of-warranty repairs at PCNA discretion &mdash; submit via PRMS</span></li>
+          <li><span><strong>CPO 111-Point Check:</strong> Required for Certified Pre-Owned warranty activation</span></li>
+          <li><span><strong>Consequential Damage after Campaigns:</strong> Covered if damage resulted from the campaign condition</span></li>
+          <li><span><strong>Trickle Charging:</strong> Required for vehicles in inventory &mdash; battery damage from discharged state may not be covered</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+
+<div id="mmac" class="panel">
+  <div class="model-hdr">
+    <h2><span>Macan</span> &bull; Macan S &bull; Macan GTS &bull; Macan Turbo &bull; Macan Electric</h2>
+    <p>XAB Electric (2024&ndash;Present) &nbsp;|&nbsp; 95B (2015&ndash;2024)</p>
+    <div class="badges">
+      <span class="badge badge-ice">4-Cyl Turbo / V6 TT (95B)</span>
+      <span class="badge badge-ev">Full Electric (XAB)</span>
+      <span class="badge badge-suv">Compact Performance SUV</span>
+    </div>
+  </div>
+  <div class="ss-banner">
+    <div class="ico">&#9888;</div>
+    <div><strong>Two Completely Different Vehicles:</strong> The 2024+ Macan (XAB) is a fully electric vehicle &mdash; no engine oil, no spark plugs, no air filter. The 2015&ndash;2024 Macan (95B) uses gasoline engines. <strong>Always confirm model year and drivetrain before quoting any service.</strong> Service schedules are fundamentally different.</div>
+  </div>
+
+  <div class="section-block active" id="mmac-maint">
+  <div class="content-grid">
+    <div>
+      <table class="itbl">
+        <thead><tr><th style="width:38%">Service Item</th><th style="width:22%">Interval</th><th>Notes</th></tr></thead>
+        <tbody>
+
+<tr class="sec-row"><td colspan="3">&#9660; Engine &amp; Lubrication (95B Gas Only)</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Engine Oil &amp; Filter</div><div class="svc-desc">2.0T (Macan) / 2.9TT (GTS, Turbo) &mdash; plastic bayonet drain w/ O-ring</div></td>
+  <td><span class="ibadge ib-annual">1 Year / 10,000 mi</span></td>
+  <td><span class="pill pill-blue">95B Only</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Spark Plugs</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-blue">95B Only</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Air Filter (Engine)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-blue">95B Only</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Fluids &amp; Brakes (All Models)</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Brake Fluid</div></td>
+  <td><span class="ibadge ib-biennial">Every 2 Years</span></td>
+  <td><span class="pill pill-red">All Macan</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Coolant</div><div class="svc-desc">XAB: HV battery &amp; motor thermal circuit</div></td>
+  <td><span class="ibadge ib-quad">Inspect 2 yrs / Change 4&ndash;6 yrs</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Transmission / Drivetrain (95B Gas Only)</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">PDK Transmission Fluid</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-blue">95B Only</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Transfer Case Fluid</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-blue">95B Only</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Front &amp; Rear Differential</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-blue">95B Only</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Electric-Specific (XAB 2024+ Only)</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">E-Motor Reducer Fluid</div><div class="svc-desc">Front &amp; rear electric motor gearboxes</div></td>
+  <td><span class="ibadge ib-quad">Per PIWIS / ~4 Years</span></td>
+  <td><span class="pill pill-teal">XAB Only</span></td>
+</tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">HV Battery Health Check</div><div class="svc-desc">BMS diagnostic via PIWIS</div></td>
+  <td><span class="ibadge ib-annual">Annually</span></td>
+  <td><span class="pill pill-teal">XAB Only</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Filters, Safety &amp; Wear (All)</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Cabin / Pollen Filter</div></td>
+  <td><span class="ibadge ib-biennial">2 Years / 20,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-seasonal">
+  <td><div class="svc-name">Wiper Blades</div></td>
+  <td><span class="ibadge ib-seasonal">Twice Per Year</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Brake Pads &amp; Rotors</div><div class="svc-desc">XAB: regen braking extends pad life significantly</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">12V Auxiliary Battery</div><div class="svc-desc">XAB uses 12V independent of HV</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="priority-sidebar">
+      <div class="priority-card">
+        <div class="pc-hdr"><div class="ico">&#9888;</div><h4>Priority Consultant Notes</h4></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>95B Integrated Exhaust Manifold.</strong> The 95B Macan has an exhaust manifold integrated into the cylinder head. Cooling system integrity is critical &mdash; overheating can damage the manifold/head assembly. Never run the engine with low coolant. <em>Source: 2019 Macan SIT</em></p></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>95B Plastic Bayonet Oil Drain.</strong> Uses a plastic bayonet-style drain plug with an O-ring. The O-ring must be replaced at every oil change. Same principle as the 992 plastic drain plug. <em>Source: 2019 Macan SIT</em></p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>XAB: No Engine Oil, No Spark Plugs.</strong> Electric Macan customers from ICE backgrounds often expect these services. Proactively explain what is and isn't part of the EV service schedule.</p></div>
+        <div class="pi"><div class="dot dot-blue"></div><p><strong>XAB Brake Pads Last Longer.</strong> Regen braking significantly reduces mechanical brake wear. Inform customers that pad intervals may extend &mdash; but brake fluid is still every 2 years regardless.</p></div>
+        <div class="pi"><div class="dot dot-green"></div><p><strong>95B PDK Fluid Frequently Missed.</strong> Many 95B Macan owners come from the SUV segment and have no dual-clutch experience. Explaining PDK fluid as &ldquo;transmission health insurance&rdquo; resonates well.</p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-block" id="mmac-issues">
+  <div class="io-section">
+    <h3>&#128269; Issues &amp; Service Opportunities &mdash; Macan</h3>
+    <div class="io-grid">
+
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">Integrated Exhaust Manifold &mdash; Cooling System Critical</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 95B Macan integrates the exhaust manifold directly into the cylinder head casting. This means the cooling system is doing double duty &mdash; cooling both the combustion chambers and the exhaust manifold. Any coolant leak or low-coolant condition risks thermal damage to the head and manifold assembly.</p>
+    <div class="src">2019 Macan 95B SIT &mdash; Engine Architecture</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Inspect coolant level, hose condition, and look for weeping at every service on a 95B Macan. Add a coolant system pressure test to the recommended service menu. Catching a small leak before it becomes a head gasket failure is a significant cost savings for the customer.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">Plastic Bayonet Oil Drain Plug with O-Ring</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 95B Macan uses a plastic bayonet-style oil drain plug that requires the O-ring to be replaced at every oil change. This is similar to the 992 single-use drain plug policy. A worn or missing O-ring will cause a slow oil leak.</p>
+    <div class="src">2019 Macan 95B SIT &mdash; Lubrication System</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Stock replacement O-rings for the 95B drain plug. Include them automatically in every oil change estimate. Inspect the plug body for cracks as well &mdash; replace the entire assembly if the bayonet is damaged.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">Variable Oil Pump &mdash; Pressure Variations Are Normal</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 95B Macan uses a variable-displacement oil pump that adjusts flow based on engine demand. Oil pressure readings may vary more than customers expect, and this is normal operation &mdash; not a fault.</p>
+    <div class="src">2019 Macan 95B SIT &mdash; Lubrication / Oil Pump</div>
+    <div class="tip"><strong>Consultant Tip:</strong> If a customer reports fluctuating oil pressure or a low-pressure warning under specific conditions, verify via PIWIS before assuming a mechanical fault. The variable pump is designed to reduce parasitic load by lowering pressure when full output is not needed.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-note"></div>
+    <div class="io-title">DLC-Coated Piston Pins</div>
+    <span class="io-sev-label sev-l-note">NOTE</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 95B engine uses Diamond-Like Carbon (DLC) coated piston pins for reduced friction. This is an advanced coating that does not require special service procedures but indicates the precision engineering involved.</p>
+    <div class="src">2019 Macan 95B SIT &mdash; Engine Internals</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Noteworthy for customer-facing conversations about engine quality. DLC coating is a motorsport-derived technology that reduces internal friction and improves efficiency. It demonstrates Porsche's commitment to performance engineering even in their compact SUV.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-opportunity"></div>
+    <div class="io-title">95B to XAB Transition Service Package</div>
+    <span class="io-sev-label sev-l-opportunity">OPPORTUNITY</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>With the Macan transitioning from ICE (95B) to full electric (XAB), there is an opportunity to create a transition service package that helps 95B owners understand what changes when they move to XAB.</p>
+    <div class="src">General &mdash; Model Transition Opportunity</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Create a comparison sheet that shows 95B vs XAB service schedules side by side. Include it in service checkout folders. This educates customers and supports trade-in conversations while demonstrating your facility's expertise with both platforms.</div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  </div>
+
+<div class="section-block" id="mmac-pricing">
+<div class="price-section">
+  <h3>&#128176; Customer Service Pricing &mdash; Macan (95B II)</h3>
+  <div class="price-grid">
+    <div class="price-card">
+  <div class="pc-label">10,000 Mile Service</div>
+  <div class="pc-service">Oil &amp; Filter Change + MPI</div>
+  <div class="pc-price">$593.80</div>
+  <div class="pc-detail">Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: Mac10k</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">20,000 Mile Service</div>
+  <div class="pc-service">Oil + Cabin Filter + Brake Flush</div>
+  <div class="pc-price">$1,436.73</div>
+  <div class="pc-detail">Wait: 4 hrs</div>
+  <div class="pc-op">OP Code: Mac20K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">30,000 Mile Service</div>
+  <div class="pc-service">Oil + Spark Plugs</div>
+  <div class="pc-price">$1,256.97</div>
+  <div class="pc-detail">Wait: 3 hrs</div>
+  <div class="pc-op">OP Code: Mac30K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">40,000 Mile Service</div>
+  <div class="pc-service">Major Maintenance</div>
+  <div class="pc-price">$2,783.86</div>
+  <div class="pc-detail">No waiting</div>
+  <div class="pc-op">OP Code: Mac40K</div>
+</div>
+  </div>
+  <div class="price-addons">
+    <h4 style="font-size:13px;margin-bottom:10px;color:var(--p-silver)">Add-On Services</h4>
+    <div class="addon-grid">
+      <div class="addon-item">
+  <div><div class="addon-name">Alignment</div><div class="addon-time">Wait: 3.5 hrs | Labor: 3 hrs</div></div>
+  <div class="addon-price">$289.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Mount &amp; Balance (per tire)</div></div>
+  <div class="addon-price">$55.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Road Force Balance</div></div>
+  <div class="addon-price">$249.88</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Diagnostic (Generic)</div></div>
+  <div class="addon-price">$230.05</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Brakes (All)</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$1,085.31</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">PDK Flush</div></div>
+  <div class="addon-price">$710.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Front Wipers</div></div>
+  <div class="addon-price">$110.00</div>
+</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mmac-labor">
+<div class="labor-section">
+  <h3>&#128295; OEM Labor Time Units &amp; Parts &mdash; Macan</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PSMP Parts and Labor Guide V1.13</p>
+  <div class="labor-grid">
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Macan S (95B) &mdash; 10K Oil Change</span><span class="tu-badge">86 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Drain Plug O-ring (x1)</span><span class="pn">90012315230</span></li>
+<li><span>Oil Filter Element (x1)</span><span class="pn">0PB115466</span></li>
+<li><span>Sealing Ring Oil Filter (x1)</span><span class="pn">94610732275</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Particle Filter (x1)</span><span class="pn">PAB81943920</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Macan S (95B) &mdash; 40K Major</span><span class="tu-badge">241 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Drain Plug O-ring (x1)</span><span class="pn">90012315230</span></li>
+<li><span>Oil Filter Element (x1)</span><span class="pn">0PB115466</span></li>
+<li><span>Sealing Ring Oil Filter (x1)</span><span class="pn">94610732275</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Particle Filter (x1)</span><span class="pn">PAB81943920</span></li>
+<li><span>Air Filter Cartridge (x2)</span><span class="pn">95B129620</span></li>
+<li><span>Transfer Fluid Filter Elem (PDK) (x1)</span><span class="pn">PAC325330</span></li>
+<li><span>PDK Transmission Oil (x6.5)</span><span class="pn">4330634</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Macan BEV (XAB) &mdash; 2 Year Service</span><span class="tu-badge">334 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Air Filter (x1)</span><span class="pn">PAD819439</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Tire Sealant (x1)</span><span class="pn">958012619</span></li></ul></div>
+</div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mmac-warranty">
+<div class="warranty-section">
+  <h3>&#128220; Porsche Warranty Reference &mdash; Key Points for Service Consultants</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PCNA Warranty Manual 2025 (V1.0)</p>
+  <div class="war-grid">
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128197;</span><h4>Warranty Periods (PCNA)</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span class="war-label">New Vehicle Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Emissions Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Paint Warranty</span><span class="war-val">4 years (no mileage limit)</span></li>
+          <li><span class="war-label">Corrosion Warranty</span><span class="war-val">12 years (no mileage limit)</span></li>
+          <li><span class="war-label">HV Battery (G2/E3+)</span><span class="war-val">8 years / 100,000 miles</span></li>
+          <li><span class="war-label">HV Battery (Pre-G2)</span><span class="war-val">6 years / 120,000 km</span></li>
+          <li><span class="war-label">Parts Warranty</span><span class="war-val">2 years (no mileage limit)</span></li>
+          <li><span class="war-label">CPO Warranty</span><span class="war-val">2 years / unlimited miles</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9940;</span><h4>Key Warranty Exclusions</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span>Normal wear and tear is NOT covered</span></li>
+          <li><span>Expendable maintenance items (spark plugs, filters, wipers, brakes, clutches, tires) NOT covered unless defect in material/workmanship</span></li>
+          <li><span>Improper repair, maintenance, or care by customer or third party voids coverage for related failures</span></li>
+          <li><span>Non-approved modifications or tuning &mdash; voids coverage unless customer proves parts are equivalent and not the cause</span></li>
+          <li><span>A/C refrigerant charge only first 3 months unless part of warranty repair</span></li>
+          <li><span>Wheel balancing and alignment only first 3 months unless part of warranty repair</span></li>
+          <li><span>Improper fuel, lubricant, or fluid use</span></li>
+          <li><span>Rodent damage is excluded</span></li>
+          <li><span>Overspeed events void engine/drivetrain coverage</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Critical:</strong> All service intervals MUST be completed per Porsche AG requirements as a precondition for ANY warranty claim. Missed services = denied claims.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128221;</span><h4>Claim Submission Rules</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>15-Day Rule:</strong> Claims must be submitted within 15 days of the technician's last time punch</span></li>
+          <li><span><strong>Repair Over Replace:</strong> Repair must be given precedence over replacement unless repair costs more</span></li>
+          <li><span><strong>Exchange Parts Required:</strong> Factory exchange parts must be used on any part listed in PET with an exchange number</span></li>
+          <li><span><strong>PCSS Documentation:</strong> All repairs must be fully documented in PCSS for quality analysis</span></li>
+          <li><span><strong>Warranty Type 111:</strong> Use for all New Vehicle Warranty claims</span></li>
+          <li><span><strong>Warranty Type 1E1:</strong> Use for Emission Warranty claims after NVW expires</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9889;</span><h4>EV / Hybrid Battery Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>BEV Battery Capacity:</strong> Warranty case if net capacity drops below threshold during warranty period</span></li>
+          <li><span><strong>Measurement:</strong> Must be performed at an authorized Porsche Center via PIWIS</span></li>
+          <li><span><strong>Exclusions:</strong> Battery removed from vehicle and opened improperly, or charging/care instructions not followed</span></li>
+          <li><span><strong>Charging Equipment:</strong> If ordered as I-Option, claim under NVW. If Tequipment, claim as Parts Warranty</span></li>
+          <li><span><strong>Dealer DC Charge Box:</strong> 8-year warranty period</span></li>
+          <li><span><strong>AC Wall Box:</strong> Covered under standard warranty terms</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Consultant Note:</strong> Battery capacity measurements are a key customer touchpoint. Proactively offer annual capacity checks to EV customers &mdash; this builds trust and catches warranty-eligible degradation early.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#127912;</span><h4>Paint &amp; Corrosion Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Paint:</strong> 4 years, no mileage limit &mdash; covers defects in paint application</span></li>
+          <li><span><strong>Corrosion:</strong> 12 years, no mileage limit &mdash; covers perforation corrosion (rust-through)</span></li>
+          <li><span><strong>Exclusions:</strong> Stone chip damage, environmental damage, chemical contamination, improper care, aftermarket paint</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128736;</span><h4>Goodwill &amp; Special Cases</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Goodwill:</strong> Available for out-of-warranty repairs at PCNA discretion &mdash; submit via PRMS</span></li>
+          <li><span><strong>CPO 111-Point Check:</strong> Required for Certified Pre-Owned warranty activation</span></li>
+          <li><span><strong>Consequential Damage after Campaigns:</strong> Covered if damage resulted from the campaign condition</span></li>
+          <li><span><strong>Trickle Charging:</strong> Required for vehicles in inventory &mdash; battery damage from discharged state may not be covered</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+
+<div id="mpan" class="panel">
+  <div class="model-hdr">
+    <h2><span>Panamera</span> &bull; Panamera 4 &bull; GTS &bull; Turbo &bull; E-Hybrid &bull; Executive</h2>
+    <p>YAA (2024&ndash;Present) &nbsp;|&nbsp; 971 (2017&ndash;2023) &nbsp;|&nbsp; 970 (2010&ndash;2016)</p>
+    <div class="badges">
+      <span class="badge badge-ice">V6 Turbo / V8 Biturbo</span>
+      <span class="badge badge-hybrid">E-Hybrid PHEV</span>
+      <span class="badge badge-sport">Grand Touring Sedan</span>
+    </div>
+  </div>
+  <div class="ss-banner">
+    <div class="ico">&#9889;</div>
+    <div><strong>E-Hybrid Critical Notice:</strong> The Panamera E-Hybrid has an electric brake booster with <strong>NO vacuum backup</strong>. The pressure tank system manages fuel vapors during EV operation and refueling may require up to 120 seconds for pressure compensation before fuel flows. Tank shut-off valve auto-closes after 900 seconds. <em>Source: 2018 Panamera 4 E-Hybrid SIT</em></div>
+  </div>
+
+  <div class="section-block active" id="mpan-maint">
+  <div class="content-grid">
+    <div>
+      <table class="itbl">
+        <thead><tr><th style="width:40%">Service Item</th><th style="width:25%">Interval</th><th>Notes</th></tr></thead>
+        <tbody>
+
+<tr class="sec-row"><td colspan="3">&#9660; Engine &amp; Lubrication</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Engine Oil &amp; Filter</div><div class="svc-desc">V6 Turbo / V8 Biturbo</div></td>
+  <td><span class="ibadge ib-annual">1 Year / 10,000 mi</span></td>
+  <td><span class="pill pill-blue">Smart Service</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Spark Plugs</div><div class="svc-desc">V6: 6 plugs | V8: 8 plugs</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Air Filter (Engine)</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Fluids &amp; Cooling</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Brake Fluid</div><div class="svc-desc">BASF Hydraulan 404</div></td>
+  <td><span class="ibadge ib-biennial">Every 2 Years</span></td>
+  <td><span class="pill pill-red">Mandatory</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Coolant</div><div class="svc-desc">E-Hybrid: separate HV cooling circuit</div></td>
+  <td><span class="ibadge ib-quad">Inspect 2 yrs / Change 4&ndash;6 yrs</span></td>
+  <td><span class="pill pill-amber">Hybrid: 2 circuits</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Drivetrain</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">PDK / 8-Speed Tiptronic Fluid</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td><span class="pill pill-amber">Often Missed</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Transfer Case / Differential Fluid</div><div class="svc-desc">AWD models</div></td>
+  <td><span class="ibadge ib-quad">4 Years / 40,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Hybrid-Specific (E-Hybrid / Turbo S E-Hybrid)</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">HV Battery Inspection</div><div class="svc-desc">Capacity / BMS check via PIWIS</div></td>
+  <td><span class="ibadge ib-annual">Annually</span></td>
+  <td><span class="pill pill-purple">E-Hybrid Only</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">HV Cooling Circuit Fluid</div><div class="svc-desc">Separate from engine coolant</div></td>
+  <td><span class="ibadge ib-quad">4&ndash;6 Years per PIWIS</span></td>
+  <td><span class="pill pill-purple">E-Hybrid Only</span></td>
+</tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Pressure Tank System Check</div><div class="svc-desc">Fuel vapor management during EV operation</div></td>
+  <td><span class="ibadge ib-annual">Inspect Annually</span></td>
+  <td><span class="pill pill-purple">E-Hybrid Only</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Filters, Safety &amp; Wear</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Cabin / Pollen Filter</div></td>
+  <td><span class="ibadge ib-biennial">2 Years / 20,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-seasonal">
+  <td><div class="svc-name">Wiper Blades</div></td>
+  <td><span class="ibadge ib-seasonal">Twice Per Year</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Brake Pads &amp; Rotors</div><div class="svc-desc">E-Hybrid: regen extends pad life; PSCB optional</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">Air Suspension</div><div class="svc-desc">Where equipped</div></td>
+  <td><span class="ibadge ib-annual">Inspect Annually</span></td>
+  <td>&mdash;</td>
+</tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="priority-sidebar">
+      <div class="priority-card">
+        <div class="pc-hdr"><div class="ico">&#9888;</div><h4>Priority Consultant Notes</h4></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>Electric Brake Booster &mdash; No Vacuum Backup.</strong> The Panamera E-Hybrid uses an electric brake booster (EBB) with NO vacuum backup. If the EBB fails, there is no pedal assist. Brake bleeding requires PIWIS-guided procedure, not vacuum bleed equipment. <em>Source: 2018 Panamera 4 E-Hybrid SIT</em></p></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>Refueling Delay Up to 120 Seconds.</strong> The pressure tank system requires up to 120 seconds for pressure compensation before fuel begins flowing. The tank shut-off valve also auto-closes after 900 seconds. Customers MUST be warned &mdash; this is normal, not a fault. <em>Source: 2018 Panamera 4 E-Hybrid SIT</em></p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>Pressure Tank System for Fuel Vapor Management.</strong> During extended EV operation, fuel vapors build up in the tank. The pressure tank system manages this. If refueling issues are reported, check the pressure tank and shut-off valve first.</p></div>
+        <div class="pi"><div class="dot dot-blue"></div><p><strong>Electric A/C Compressor (No Belt).</strong> The E-Hybrid uses a fully electric A/C compressor independent of the engine. No serpentine belt drives it. A/C operates in full EV mode. <em>Source: 2018 Panamera 4 E-Hybrid SIT</em></p></div>
+        <div class="pi"><div class="dot dot-green"></div><p><strong>PSCB Chrome Appearance Is Normal.</strong> Porsche Surface Coated Brakes develop a fine-cracked chrome appearance over time. This is normal and does not indicate brake failure. Proactively educate customers to prevent unnecessary warranty claims.</p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-block" id="mpan-issues">
+  <div class="io-section">
+    <h3>&#128269; Issues &amp; Service Opportunities &mdash; Panamera</h3>
+    <div class="io-grid">
+
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">Electric Brake Booster &mdash; No Vacuum Backup (E-Hybrid)</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The Panamera E-Hybrid replaces the traditional vacuum brake booster with an electric brake booster (EBB). There is NO vacuum backup system. If the EBB fails or loses power, brake pedal assist is immediately lost. Bleeding procedure is completely different from vacuum-based systems.</p>
+    <div class="src">2018 Panamera 4 E-Hybrid SIT &mdash; Brake System Architecture</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Train all technicians on EBB-specific brake bleeding before accepting E-Hybrid brake work. Standard vacuum bleed equipment will not work. PIWIS must be connected during the bleeding process. This is a critical safety and liability item.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">Refueling Delay &mdash; Up to 120 Seconds Pressure Compensation</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The Panamera E-Hybrid's pressure tank system requires up to 120 seconds for pressure equalization before fuel can flow during refueling. Additionally, the tank shut-off valve automatically closes after 900 seconds of refueling. Customers who are unaware of this may believe they have a fuel system malfunction.</p>
+    <div class="src">2018 Panamera 4 E-Hybrid SIT &mdash; Fuel System / Pressure Tank</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Inform every E-Hybrid customer about the refueling delay during delivery or first service visit. Include it in the service checkout notes. If a customer reports a 'fuel pump won't start flowing' complaint, check the pressure tank system before ordering parts.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">Pressure Tank Fuel Vapor Management System</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>During extended EV-only operation, fuel sits unused in the tank and generates vapor pressure. The pressure tank system absorbs and manages these vapors. Malfunction can cause fuel odor in the cabin or refueling difficulties.</p>
+    <div class="src">2018 Panamera 4 E-Hybrid SIT &mdash; Evaporative Emission System</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Add pressure tank inspection to the annual E-Hybrid service checklist. If a customer reports fuel smell or difficult refueling, the pressure tank and charcoal canister are the first diagnostic targets.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-note"></div>
+    <div class="io-title">Electric A/C Compressor &mdash; Belt-Free Operation</div>
+    <span class="io-sev-label sev-l-note">NOTE</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The E-Hybrid A/C compressor is fully electric and operates independently of the engine. There is no serpentine belt connection. This allows A/C to function in full EV mode but also means the compressor draws from the HV battery.</p>
+    <div class="src">2018 Panamera 4 E-Hybrid SIT &mdash; Climate Control</div>
+    <div class="tip"><strong>Consultant Tip:</strong> If customers report reduced EV range in hot weather, explain that the electric A/C compressor draws from the HV battery. This is normal. Pre-conditioning the cabin while plugged in can help preserve range.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-opportunity"></div>
+    <div class="io-title">PSCB Brake Education Program</div>
+    <span class="io-sev-label sev-l-opportunity">OPPORTUNITY</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>Porsche Surface Coated Brakes (PSCB) develop a fine-cracked chrome appearance that many customers mistake for damage. This generates unnecessary warranty inquiries and service visits that cost time for both the dealer and customer.</p>
+    <div class="src">General &mdash; PSCB Technical Information</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Create a PSCB visual guide (photos of normal vs. abnormal appearance) and include it in delivery documentation. This prevents unnecessary warranty claims and positions your team as technically expert.</div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  </div>
+
+<div class="section-block" id="mpan-pricing">
+<div class="price-section">
+  <h3>&#128176; Customer Service Pricing &mdash; Panamera (G2.2 / 971)</h3>
+  <div class="price-grid">
+    <div class="price-card">
+  <div class="pc-label">10,000 Mile Service</div>
+  <div class="pc-service">Oil &amp; Filter Change + MPI</div>
+  <div class="pc-price">$410.58</div>
+  <div class="pc-detail">Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: Pan10K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">20,000 Mile Service</div>
+  <div class="pc-service">Oil + Cabin Filter + Brake Flush</div>
+  <div class="pc-price">$1,100.00</div>
+  <div class="pc-detail">Wait: 4 hrs</div>
+  <div class="pc-op">OP Code: Pan20K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">30,000 Mile Service</div>
+  <div class="pc-service">Oil + Spark Plugs</div>
+  <div class="pc-price">$1,575.00</div>
+  <div class="pc-detail">Wait: 2 hrs (3 for Turbo)</div>
+  <div class="pc-op">OP Code: Pan30K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">40,000 Mile Service</div>
+  <div class="pc-service">Major Maintenance</div>
+  <div class="pc-price">$2,425.00</div>
+  <div class="pc-detail">No waiting</div>
+  <div class="pc-op">OP Code: Pan40K</div>
+</div>
+  </div>
+  <div class="price-addons">
+    <h4 style="font-size:13px;margin-bottom:10px;color:var(--p-silver)">Add-On Services</h4>
+    <div class="addon-grid">
+      <div class="addon-item">
+  <div><div class="addon-name">Alignment</div><div class="addon-time">Wait: 3 hrs | Labor: 2 hrs</div></div>
+  <div class="addon-price">$289.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Mount &amp; Balance (per tire)</div></div>
+  <div class="addon-price">$55.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Road Force Balance</div></div>
+  <div class="addon-price">$199.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Diagnostic (Generic)</div></div>
+  <div class="addon-price">$230.05</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Front Brakes</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$2,425.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Rear Brakes</div><div class="addon-time">Labor: 2.5 hrs</div></div>
+  <div class="addon-price">$1,475.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Transmission Flush</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$950.00</div>
+</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mpan-labor">
+<div class="labor-section">
+  <h3>&#128295; OEM Labor Time Units &amp; Parts &mdash; Panamera</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PSMP Parts and Labor Guide V1.13</p>
+  <div class="labor-grid">
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Panamera Base (971) &mdash; 10K Oil Change</span><span class="tu-badge">124 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Filter Element (x1)</span><span class="pn">9A719840500</span></li>
+<li><span>Sealing Ring (x1)</span><span class="pn">PAF013849</span></li>
+<li><span>Hexagon Nut (x1)</span><span class="pn">PAF912696</span></li>
+<li><span>Outer Hexagon Round Screw (x2)</span><span class="pn">WHT008539</span></li>
+<li><span>Hex Collared Bolt (x1)</span><span class="pn">N 10664503</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Panamera Base (971) &mdash; 40K Major</span><span class="tu-badge">330 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Oil Filter Element (x1)</span><span class="pn">9A719840500</span></li>
+<li><span>Dust and Pollen Filter (x1)</span><span class="pn">9A7819429</span></li>
+<li><span>Sealing Ring (x1)</span><span class="pn">PAF013849</span></li>
+<li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Thread Plug w/ Seal (x1)</span><span class="pn">PAF008973</span></li>
+<li><span>PDK Transmission Oil (x9)</span><span class="pn">4321044</span></li>
+<li><span>Inspection Plug (x1)</span><span class="pn">9A700852600</span></li>
+<li><span>Air Filter Element (x1)</span><span class="pn">971129620B</span></li></ul></div>
+</div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mpan-warranty">
+<div class="warranty-section">
+  <h3>&#128220; Porsche Warranty Reference &mdash; Key Points for Service Consultants</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PCNA Warranty Manual 2025 (V1.0)</p>
+  <div class="war-grid">
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128197;</span><h4>Warranty Periods (PCNA)</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span class="war-label">New Vehicle Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Emissions Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Paint Warranty</span><span class="war-val">4 years (no mileage limit)</span></li>
+          <li><span class="war-label">Corrosion Warranty</span><span class="war-val">12 years (no mileage limit)</span></li>
+          <li><span class="war-label">HV Battery (G2/E3+)</span><span class="war-val">8 years / 100,000 miles</span></li>
+          <li><span class="war-label">HV Battery (Pre-G2)</span><span class="war-val">6 years / 120,000 km</span></li>
+          <li><span class="war-label">Parts Warranty</span><span class="war-val">2 years (no mileage limit)</span></li>
+          <li><span class="war-label">CPO Warranty</span><span class="war-val">2 years / unlimited miles</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9940;</span><h4>Key Warranty Exclusions</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span>Normal wear and tear is NOT covered</span></li>
+          <li><span>Expendable maintenance items (spark plugs, filters, wipers, brakes, clutches, tires) NOT covered unless defect in material/workmanship</span></li>
+          <li><span>Improper repair, maintenance, or care by customer or third party voids coverage for related failures</span></li>
+          <li><span>Non-approved modifications or tuning &mdash; voids coverage unless customer proves parts are equivalent and not the cause</span></li>
+          <li><span>A/C refrigerant charge only first 3 months unless part of warranty repair</span></li>
+          <li><span>Wheel balancing and alignment only first 3 months unless part of warranty repair</span></li>
+          <li><span>Improper fuel, lubricant, or fluid use</span></li>
+          <li><span>Rodent damage is excluded</span></li>
+          <li><span>Overspeed events void engine/drivetrain coverage</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Critical:</strong> All service intervals MUST be completed per Porsche AG requirements as a precondition for ANY warranty claim. Missed services = denied claims.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128221;</span><h4>Claim Submission Rules</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>15-Day Rule:</strong> Claims must be submitted within 15 days of the technician's last time punch</span></li>
+          <li><span><strong>Repair Over Replace:</strong> Repair must be given precedence over replacement unless repair costs more</span></li>
+          <li><span><strong>Exchange Parts Required:</strong> Factory exchange parts must be used on any part listed in PET with an exchange number</span></li>
+          <li><span><strong>PCSS Documentation:</strong> All repairs must be fully documented in PCSS for quality analysis</span></li>
+          <li><span><strong>Warranty Type 111:</strong> Use for all New Vehicle Warranty claims</span></li>
+          <li><span><strong>Warranty Type 1E1:</strong> Use for Emission Warranty claims after NVW expires</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9889;</span><h4>EV / Hybrid Battery Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>BEV Battery Capacity:</strong> Warranty case if net capacity drops below threshold during warranty period</span></li>
+          <li><span><strong>Measurement:</strong> Must be performed at an authorized Porsche Center via PIWIS</span></li>
+          <li><span><strong>Exclusions:</strong> Battery removed from vehicle and opened improperly, or charging/care instructions not followed</span></li>
+          <li><span><strong>Charging Equipment:</strong> If ordered as I-Option, claim under NVW. If Tequipment, claim as Parts Warranty</span></li>
+          <li><span><strong>Dealer DC Charge Box:</strong> 8-year warranty period</span></li>
+          <li><span><strong>AC Wall Box:</strong> Covered under standard warranty terms</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Consultant Note:</strong> Battery capacity measurements are a key customer touchpoint. Proactively offer annual capacity checks to EV customers &mdash; this builds trust and catches warranty-eligible degradation early.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#127912;</span><h4>Paint &amp; Corrosion Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Paint:</strong> 4 years, no mileage limit &mdash; covers defects in paint application</span></li>
+          <li><span><strong>Corrosion:</strong> 12 years, no mileage limit &mdash; covers perforation corrosion (rust-through)</span></li>
+          <li><span><strong>Exclusions:</strong> Stone chip damage, environmental damage, chemical contamination, improper care, aftermarket paint</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128736;</span><h4>Goodwill &amp; Special Cases</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Goodwill:</strong> Available for out-of-warranty repairs at PCNA discretion &mdash; submit via PRMS</span></li>
+          <li><span><strong>CPO 111-Point Check:</strong> Required for Certified Pre-Owned warranty activation</span></li>
+          <li><span><strong>Consequential Damage after Campaigns:</strong> Covered if damage resulted from the campaign condition</span></li>
+          <li><span><strong>Trickle Charging:</strong> Required for vehicles in inventory &mdash; battery damage from discharged state may not be covered</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+
+<div id="mtay" class="panel">
+  <div class="model-hdr">
+    <h2><span>Taycan</span> &bull; Taycan 4S &bull; Taycan GTS &bull; Taycan Turbo &bull; Taycan Turbo S &bull; Taycan Turbo GT</h2>
+    <p>J1 Gen 2 (2025&ndash;Present) &nbsp;|&nbsp; J1 Gen 1 (2020&ndash;2024)</p>
+    <div class="badges">
+      <span class="badge badge-ev">Full Electric &mdash; 800V Architecture</span>
+      <span class="badge badge-sport">Performance EV Sedan &amp; Sport Turismo</span>
+    </div>
+  </div>
+  <div class="ss-banner">
+    <div class="ico">&#9889;</div>
+    <div><strong>2025 Taycan (Gen 2) Major Redesign:</strong> 4 separate thermal circuits (up from 2), redesigned coolant distributor, heat pump now standard on select trims only, battery conditioning achieves target temp in 12 minutes (vs 20+ min Gen 1), Porsche Active Ride (PAR) hydraulic suspension available. HV battery target: 35&deg;C for max charging, 16&deg;C for performance mode. <em>Source: 2025 Taycan SIT</em></div>
+  </div>
+
+  <div class="section-block active" id="mtay-maint">
+  <div class="content-grid">
+    <div>
+      <table class="itbl">
+        <thead><tr><th style="width:40%">Service Item</th><th style="width:25%">Interval</th><th>Notes</th></tr></thead>
+        <tbody>
+
+<tr class="sec-row"><td colspan="3">&#9660; Fluids &amp; Brakes</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Brake Fluid</div><div class="svc-desc">Every 2 years &mdash; mandatory regardless of EV regen usage</div></td>
+  <td><span class="ibadge ib-biennial">Every 2 Years</span></td>
+  <td><span class="pill pill-red">Mandatory</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">Coolant (4 Thermal Circuits)</div><div class="svc-desc">2025: 4 separate circuits; Gen 1: 2 circuits</div></td>
+  <td><span class="ibadge ib-quad">Inspect 2 yrs / Change 4&ndash;6 yrs</span></td>
+  <td><span class="pill pill-amber">2025: 4 Circuits</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Drivetrain</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">E-Motor Reducer Fluid</div><div class="svc-desc">Front &amp; rear electric motor gearboxes</div></td>
+  <td><span class="ibadge ib-quad">Per PIWIS / ~4 Years</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">2-Speed Rear Transmission Fluid</div><div class="svc-desc">Taycan-unique rear 2-speed gearbox</div></td>
+  <td><span class="ibadge ib-quad">Per PIWIS / ~4 Years</span></td>
+  <td><span class="pill pill-teal">Taycan Unique</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Battery &amp; HV System</td></tr>
+<tr class="data-row ib-annual">
+  <td><div class="svc-name">HV Battery Health Check</div><div class="svc-desc">BMS diagnostic, capacity measurement via PIWIS</div></td>
+  <td><span class="ibadge ib-annual">Annually</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">12V Auxiliary Battery</div><div class="svc-desc">Can discharge from Connect app usage while parked</div></td>
+  <td><span class="ibadge ib-every">Check Every 3 Months (Storage)</span></td>
+  <td><span class="pill pill-amber">Connect App Risk</span></td>
+</tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">HV Battery Coolant</div><div class="svc-desc">Part of thermal circuit service</div></td>
+  <td><span class="ibadge ib-quad">Per PIWIS / ~4&ndash;6 yrs</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Climate &amp; A/C</td></tr>
+<tr class="data-row ib-quad">
+  <td><div class="svc-name">A/C Refrigerant (R1234yf)</div><div class="svc-desc">Flammable refrigerant &mdash; SAE J2845 certified tech required</div></td>
+  <td><span class="ibadge ib-quad">Per PIWIS / As Needed</span></td>
+  <td><span class="pill pill-red">Safety Cert Required</span></td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Filters, Safety &amp; Wear</td></tr>
+<tr class="data-row ib-biennial">
+  <td><div class="svc-name">Cabin / Pollen Filter</div></td>
+  <td><span class="ibadge ib-biennial">2 Years / 20,000 mi</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-seasonal">
+  <td><div class="svc-name">Wiper Blades</div></td>
+  <td><span class="ibadge ib-seasonal">Twice Per Year</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Brake Pads &amp; Rotors</div><div class="svc-desc">PSCB standard on many trims; regen extends pad life</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="data-row ib-every">
+  <td><div class="svc-name">Tire Condition &amp; Pressure</div><div class="svc-desc">Higher curb weight; EV-specific tires recommended</div></td>
+  <td><span class="ibadge ib-every">At Every Service</span></td>
+  <td>&mdash;</td>
+</tr>
+<tr class="sec-row"><td colspan="3">&#9660; Not Applicable (EV)</td></tr>
+<tr class="data-row ib-na">
+  <td><div class="svc-name">Engine Oil &amp; Filter</div></td>
+  <td><span class="ibadge ib-na">N/A</span></td>
+  <td><span class="pill pill-purple">No Engine</span></td>
+</tr>
+<tr class="data-row ib-na">
+  <td><div class="svc-name">Spark Plugs</div></td>
+  <td><span class="ibadge ib-na">N/A</span></td>
+  <td><span class="pill pill-purple">No Engine</span></td>
+</tr>
+<tr class="data-row ib-na">
+  <td><div class="svc-name">Air Filter (Engine)</div></td>
+  <td><span class="ibadge ib-na">N/A</span></td>
+  <td><span class="pill pill-purple">No Engine</span></td>
+</tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="priority-sidebar">
+      <div class="priority-card">
+        <div class="pc-hdr"><div class="ico">&#9888;</div><h4>Priority Consultant Notes</h4></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>R1234yf Refrigerant &mdash; SAE J2845 Required.</strong> The Taycan uses R1234yf, a flammable refrigerant. Technicians MUST hold SAE J2845 certification before performing any A/C work. This is a non-negotiable safety and liability requirement.</p></div>
+        <div class="pi"><div class="dot dot-red"></div><p><strong>2025: 4 Separate Thermal Circuits.</strong> The Gen 2 Taycan has 4 independent cooling circuits (up from 2). Each requires individual inspection and fluid service. Service labor time is significantly higher than Gen 1. <em>Source: 2025 Taycan SIT</em></p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>12V Battery Drain from Connect App.</strong> Customers who frequently use the Porsche Connect app while the car is parked can drain the 12V battery. Recommend checking the 12V battery every 3 months during storage and disabling the app for long-term parking.</p></div>
+        <div class="pi"><div class="dot dot-amber"></div><p><strong>Heat Pump Not on All Trims.</strong> The 2025 Taycan's heat pump is standard only on select trims. Verify equipment before discussing winter range expectations with customers. Vehicles without the heat pump will have notably reduced cold-weather range. <em>Source: 2025 Taycan SIT</em></p></div>
+        <div class="pi"><div class="dot dot-blue"></div><p><strong>Battery Conditioning: 12 min (Gen 2) vs 20+ min (Gen 1).</strong> The 2025 Taycan conditions its battery to optimal charging temperature in roughly 12 minutes, nearly halving Gen 1's time. Great trade-in talking point. <em>Source: 2025 Taycan SIT</em></p></div>
+        <div class="pi"><div class="dot dot-green"></div><p><strong>Charge to 85% Daily.</strong> Recommend customers use the charging planner to charge to 85% for daily use (100% for road trips only). This preserves long-term battery health &mdash; a key retention talking point for EV customers.</p></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-block" id="mtay-issues">
+  <div class="io-section">
+    <h3>&#128269; Issues &amp; Service Opportunities &mdash; Taycan</h3>
+    <div class="io-grid">
+
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-critical"></div>
+    <div class="io-title">R1234yf Refrigerant &mdash; Flammable, SAE J2845 Certification Required</div>
+    <span class="io-sev-label sev-l-critical">CRITICAL</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The Taycan uses R1234yf refrigerant, which is flammable. SAE J2845 certification is mandatory for any technician performing A/C service. Performing A/C work without this certification creates serious safety and liability risks.</p>
+    <div class="src">General Porsche EV Technical Requirement</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Verify all technicians working on Taycan A/C systems hold current SAE J2845 certification. Maintain certification records and ensure recertification is tracked. Do not allow uncertified personnel to open the A/C system under any circumstances.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">2025 Taycan: 4 Separate Thermal Circuits</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The Gen 2 (2025) Taycan introduces 4 independent thermal circuits with a redesigned coolant distributor, up from 2 circuits on Gen 1. Each circuit serves a different function: battery cooling, battery heating, cabin climate, and drivetrain cooling. Service complexity increases significantly.</p>
+    <div class="src">2025 Taycan SIT &mdash; Thermal Management Architecture</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Update service time estimates for 2025+ Taycan coolant service. The 4-circuit system requires individual inspection and potentially separate fluid changes. Train technicians on the new coolant distributor layout and circuit identification.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">HV Battery Temperature Targets: 35&deg;C Charging / 16&deg;C Performance</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The Taycan's battery management targets 35&deg;C for maximum DC fast charging speed and 16&deg;C for performance driving mode. The Gen 2 battery conditioning system achieves these targets in approximately 12 minutes, nearly halving the Gen 1 time.</p>
+    <div class="src">2025 Taycan SIT &mdash; Battery Thermal Management</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Educate customers on battery pre-conditioning via the Porsche app or navigation system. Setting a charger as a destination triggers automatic pre-conditioning. This dramatically improves charging speed, especially in cold weather.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-important"></div>
+    <div class="io-title">12V Battery Discharge from Porsche Connect App</div>
+    <span class="io-sev-label sev-l-important">IMPORTANT</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>Customers who frequently use the Porsche Connect app (remote climate, charging status, etc.) while the vehicle is parked can inadvertently drain the 12V auxiliary battery. This can prevent the vehicle from starting or waking up.</p>
+    <div class="src">General Taycan Technical Knowledge + Owner's Manual</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Add 12V battery voltage check to every Taycan service visit. Recommend customers disable the Connect app for extended parking (&gt;2 weeks). For long-term storage, recommend a 12V maintainer and checking battery health every 3 months.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-note"></div>
+    <div class="io-title">Heat Pump &mdash; Standard on Select Trims Only (2025)</div>
+    <span class="io-sev-label sev-l-note">NOTE</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2025 Taycan's heat pump is NOT available on all trim levels. Vehicles without the heat pump use resistive heating, which significantly impacts winter driving range. This is a common source of customer confusion.</p>
+    <div class="src">2025 Taycan SIT &mdash; Climate System</div>
+    <div class="tip"><strong>Consultant Tip:</strong> Verify heat pump equipment on every Taycan before discussing winter range performance. If the vehicle lacks a heat pump, set realistic cold-weather range expectations. This prevents customer disappointment and builds trust.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-opportunity"></div>
+    <div class="io-title">Gen 1 to Gen 2 Taycan Trade-In Opportunity</div>
+    <span class="io-sev-label sev-l-opportunity">OPPORTUNITY</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The Gen 2 Taycan offers significant improvements: faster battery conditioning (12 min vs 20+), 4 thermal circuits for better management, improved range, and Porsche Active Ride suspension availability. These create compelling trade-in talking points.</p>
+    <div class="src">2025 Taycan SIT &mdash; Complete Technical Overview</div>
+    <div class="tip"><strong>Consultant Tip:</strong> When servicing Gen 1 Taycans, mention specific Gen 2 improvements during checkout. The 12-minute battery conditioning and improved thermal management are tangible benefits customers can understand. Support service-to-sales pipeline.</div>
+  </div>
+</div>
+<div class="io-card" onclick="toggleCard(this)">
+  <div class="io-card-hdr">
+    <div class="sev sev-note"></div>
+    <div class="io-title">Porsche Active Ride (PAR) Hydraulic Suspension</div>
+    <span class="io-sev-label sev-l-note">NOTE</span>
+    <span class="io-arrow">&#9654;</span>
+  </div>
+  <div class="io-body">
+    <p>The 2025 Taycan offers an active hydraulic suspension system (PAR) that can actively raise and lower each corner independently. This system requires its own hydraulic fluid and has unique service procedures not shared with standard air suspension.</p>
+    <div class="src">2025 Taycan SIT &mdash; Chassis / PAR System</div>
+    <div class="tip"><strong>Consultant Tip:</strong> If a customer's Taycan is equipped with PAR, flag it in the service history. PAR-equipped vehicles have additional fluid service requirements and diagnostic procedures. Confirm technician familiarity with PAR before accepting suspension work.</div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  </div>
+
+<div class="section-block" id="mtay-pricing">
+<div class="price-section">
+  <h3>&#128176; Customer Service Pricing &mdash; Taycan</h3>
+  <div class="price-grid">
+    <div class="price-card">
+  <div class="pc-label">2-Year Service</div>
+  <div class="pc-service">Brake Flush + MPI</div>
+  <div class="pc-price">$425.00</div>
+  <div class="pc-detail">Brake fluid flush, tire pressure, MPI, wash &amp; vac. Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: 91110K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">4-Year Service</div>
+  <div class="pc-service">Cabin Filter + Brake Flush</div>
+  <div class="pc-price">$1,275.00</div>
+  <div class="pc-detail">Adds cabin filter, wipers, fix-a-flat replacement. Wait: 4 hrs</div>
+  <div class="pc-op">OP Code: 91120K</div>
+</div>
+    <div class="price-card">
+  <div class="pc-label">6-Year Service</div>
+  <div class="pc-service">Brake Pads + Full Service</div>
+  <div class="pc-price">$1,575.00</div>
+  <div class="pc-detail">Brake pad replacement, full fluid service. Wait: 2 hrs</div>
+  <div class="pc-op">OP Code: 91130K</div>
+</div>
+  </div>
+  <div class="price-addons">
+    <h4 style="font-size:13px;margin-bottom:10px;color:var(--p-silver)">Add-On Services</h4>
+    <div class="addon-grid">
+      <div class="addon-item">
+  <div><div class="addon-name">Alignment</div><div class="addon-time">Wait: 3.5 hrs | Labor: 5.5 hrs</div></div>
+  <div class="addon-price">$259.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Mount &amp; Balance (per tire)</div></div>
+  <div class="addon-price">$55.00</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Road Force Balance</div></div>
+  <div class="addon-price">$199.95</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Diagnostic (Generic)</div></div>
+  <div class="addon-price">$230.05</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Front Brakes (Labor Only)</div><div class="addon-time">Labor: 2 hrs</div></div>
+  <div class="addon-price">$299.99</div>
+</div>
+      <div class="addon-item">
+  <div><div class="addon-name">Rear Brakes (Labor Only)</div><div class="addon-time">Labor: 2.5 hrs</div></div>
+  <div class="addon-price">$375.00</div>
+</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mtay-labor">
+<div class="labor-section">
+  <h3>&#128295; OEM Labor Time Units &amp; Parts &mdash; Taycan</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PSMP Parts and Labor Guide V1.13 &mdash; Taycan uses 2/4/6 year intervals (not mileage-based)</p>
+  <div class="labor-grid">
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Taycan Base &mdash; 2 Year Service</span><span class="tu-badge">297 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Brake Fluid (x1.5)</span><span class="pn">4321082</span></li>
+<li><span>Dust and Pollen Filter (x1)</span><span class="pn">9A7819429</span></li>
+<li><span>Tire Sealant (x1)</span><span class="pn">958012619</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Taycan 4S &mdash; 4 Year Service</span><span class="tu-badge">297 TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Dust and Pollen Filter (x1)</span><span class="pn">9A7819429</span></li>
+<li><span>Brake Fluid (x1.5)</span><span class="pn">4321082</span></li>
+<li><span>Tire Sealant (x1)</span><span class="pn">958012619</span></li></ul></div>
+</div>
+    <div class="labor-card">
+  <div class="labor-card-hdr"><span>Taycan Turbo &mdash; 6 Year Service</span><span class="tu-badge">297+ TU TU</span></div>
+  <div class="labor-card-body"><ul class="parts-list"><li><span>Brake Fluid (x1)</span><span class="pn">4321082</span></li>
+<li><span>Brake Pads (Front) (x1)</span><span class="pn">9J1698151J</span></li>
+<li><span>Brake Pads (Rear) (x1)</span><span class="pn">9J1698451E</span></li>
+<li><span>Cup Expander Spring (x2)</span><span class="pn">9J1698995</span></li>
+<li><span>Retainer Spring (x4)</span><span class="pn">9A769826900</span></li>
+<li><span>Screw (x4)</span><span class="pn">PAF911837</span></li>
+<li><span>Screw (x4)</span><span class="pn">PAF004571</span></li></ul></div>
+</div>
+  </div>
+</div>
+</div>
+
+<div class="section-block" id="mtay-warranty">
+<div class="warranty-section">
+  <h3>&#128220; Porsche Warranty Reference &mdash; Key Points for Service Consultants</h3>
+  <p style="font-size:11px;color:var(--p-silver);margin-bottom:14px">Source: PCNA Warranty Manual 2025 (V1.0)</p>
+  <div class="war-grid">
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128197;</span><h4>Warranty Periods (PCNA)</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span class="war-label">New Vehicle Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Emissions Warranty</span><span class="war-val">4 years / 50,000 miles</span></li>
+          <li><span class="war-label">Paint Warranty</span><span class="war-val">4 years (no mileage limit)</span></li>
+          <li><span class="war-label">Corrosion Warranty</span><span class="war-val">12 years (no mileage limit)</span></li>
+          <li><span class="war-label">HV Battery (G2/E3+)</span><span class="war-val">8 years / 100,000 miles</span></li>
+          <li><span class="war-label">HV Battery (Pre-G2)</span><span class="war-val">6 years / 120,000 km</span></li>
+          <li><span class="war-label">Parts Warranty</span><span class="war-val">2 years (no mileage limit)</span></li>
+          <li><span class="war-label">CPO Warranty</span><span class="war-val">2 years / unlimited miles</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9940;</span><h4>Key Warranty Exclusions</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span>Normal wear and tear is NOT covered</span></li>
+          <li><span>Expendable maintenance items (spark plugs, filters, wipers, brakes, clutches, tires) NOT covered unless defect in material/workmanship</span></li>
+          <li><span>Improper repair, maintenance, or care by customer or third party voids coverage for related failures</span></li>
+          <li><span>Non-approved modifications or tuning &mdash; voids coverage unless customer proves parts are equivalent and not the cause</span></li>
+          <li><span>A/C refrigerant charge only first 3 months unless part of warranty repair</span></li>
+          <li><span>Wheel balancing and alignment only first 3 months unless part of warranty repair</span></li>
+          <li><span>Improper fuel, lubricant, or fluid use</span></li>
+          <li><span>Rodent damage is excluded</span></li>
+          <li><span>Overspeed events void engine/drivetrain coverage</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Critical:</strong> All service intervals MUST be completed per Porsche AG requirements as a precondition for ANY warranty claim. Missed services = denied claims.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128221;</span><h4>Claim Submission Rules</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>15-Day Rule:</strong> Claims must be submitted within 15 days of the technician's last time punch</span></li>
+          <li><span><strong>Repair Over Replace:</strong> Repair must be given precedence over replacement unless repair costs more</span></li>
+          <li><span><strong>Exchange Parts Required:</strong> Factory exchange parts must be used on any part listed in PET with an exchange number</span></li>
+          <li><span><strong>PCSS Documentation:</strong> All repairs must be fully documented in PCSS for quality analysis</span></li>
+          <li><span><strong>Warranty Type 111:</strong> Use for all New Vehicle Warranty claims</span></li>
+          <li><span><strong>Warranty Type 1E1:</strong> Use for Emission Warranty claims after NVW expires</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#9889;</span><h4>EV / Hybrid Battery Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>BEV Battery Capacity:</strong> Warranty case if net capacity drops below threshold during warranty period</span></li>
+          <li><span><strong>Measurement:</strong> Must be performed at an authorized Porsche Center via PIWIS</span></li>
+          <li><span><strong>Exclusions:</strong> Battery removed from vehicle and opened improperly, or charging/care instructions not followed</span></li>
+          <li><span><strong>Charging Equipment:</strong> If ordered as I-Option, claim under NVW. If Tequipment, claim as Parts Warranty</span></li>
+          <li><span><strong>Dealer DC Charge Box:</strong> 8-year warranty period</span></li>
+          <li><span><strong>AC Wall Box:</strong> Covered under standard warranty terms</span></li>
+        </ul>
+        <div class="war-highlight"><strong>Consultant Note:</strong> Battery capacity measurements are a key customer touchpoint. Proactively offer annual capacity checks to EV customers &mdash; this builds trust and catches warranty-eligible degradation early.</div>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#127912;</span><h4>Paint &amp; Corrosion Warranty</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Paint:</strong> 4 years, no mileage limit &mdash; covers defects in paint application</span></li>
+          <li><span><strong>Corrosion:</strong> 12 years, no mileage limit &mdash; covers perforation corrosion (rust-through)</span></li>
+          <li><span><strong>Exclusions:</strong> Stone chip damage, environmental damage, chemical contamination, improper care, aftermarket paint</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="war-card">
+      <div class="war-card-hdr"><span class="war-ico">&#128736;</span><h4>Goodwill &amp; Special Cases</h4></div>
+      <div class="war-card-body">
+        <ul>
+          <li><span><strong>Goodwill:</strong> Available for out-of-warranty repairs at PCNA discretion &mdash; submit via PRMS</span></li>
+          <li><span><strong>CPO 111-Point Check:</strong> Required for Certified Pre-Owned warranty activation</span></li>
+          <li><span><strong>Consequential Damage after Campaigns:</strong> Covered if damage resulted from the campaign condition</span></li>
+          <li><span><strong>Trickle Charging:</strong> Required for vehicles in inventory &mdash; battery damage from discharged state may not be covered</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+
+<div class="legend">
+  <strong>Interval Legend:</strong>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(30,136,229,0.4)"></div>Annual / 10k mi</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(251,140,0,0.4)"></div>Every 2 Years</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(229,57,53,0.4)"></div>4 Years / 40k mi</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(67,160,71,0.4)"></div>Every Service</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(142,36,170,0.4)"></div>Seasonal</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(100,100,100,0.4)"></div>N/A (EV)</div>
+  <span style="margin-left:20px"><strong>Severity:</strong></span>
+  <div class="legend-item"><div class="legend-dot" style="background:#E53935;border-radius:50%"></div>Critical</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FB8C00;border-radius:50%"></div>Important</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1E88E5;border-radius:50%"></div>Note</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#43A047;border-radius:50%"></div>Opportunity</div>
+</div>
+
+
+<footer>
+  Porsche Technical Maintenance Dashboard &bull; Data sourced from OEM Service Information Technik (SIT) documents, Owner&rsquo;s Manuals, and Porsche AfterSales Training materials &bull; For authorized dealer use
+</footer>
+
+
+<script>
+// ---- MODEL TABS ----
+function showModel(id, tabEl) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(tabEl) tabEl.classList.add('active');
+  applyView();
+}
+
+// ---- VIEW TOGGLE ----
+let currentView = 'maint';
+function setView(view, btn) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  applyView();
+}
+function applyView() {
+  const active = document.querySelector('.panel.active');
+  if(!active) return;
+  const mid = active.id;
+  const sections = ['maint','issues','pricing','labor','warranty'];
+  const els = {};
+  sections.forEach(s => { els[s] = active.querySelector('#'+mid+'-'+s); });
+  // Hide all first
+  sections.forEach(s => { if(els[s]) els[s].classList.remove('active'); });
+  // Show based on view
+  if(currentView === 'all') {
+    sections.forEach(s => { if(els[s]) els[s].classList.add('active'); });
+  } else if(currentView === 'both') {
+    if(els.maint) els.maint.classList.add('active');
+    if(els.issues) els.issues.classList.add('active');
+  } else {
+    if(els[currentView]) els[currentView].classList.add('active');
+  }
+}
+
+// ---- ISSUE CARDS ----
+function toggleCard(card) {
+  card.classList.toggle('open');
+}
+
+// ---- SEARCH ----
+function filterAll() {
+  const q = document.getElementById('globalSearch').value.toLowerCase().trim();
+  // Filter maintenance table rows
+  document.querySelectorAll('.data-row').forEach(r => {
+    const text = r.textContent.toLowerCase();
+    r.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+  // Filter issue cards
+  document.querySelectorAll('.io-card').forEach(c => {
+    const text = c.textContent.toLowerCase();
+    c.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+// ---- INTERVAL FILTER ----
+let currentFilter = 'all';
+function setFilter(f, chip) {
+  currentFilter = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if(chip) chip.classList.add('active');
+  document.querySelectorAll('.data-row').forEach(r => {
+    if(f === 'all') { r.style.display = ''; return; }
+    const map = {'annual':'ib-annual','biennial':'ib-biennial','quad':'ib-quad','every':'ib-every'};
+    const cls = map[f] || '';
+    r.style.display = r.classList.contains(cls) ? '' : 'none';
+  });
+}
+
+// ---- SECTION ROW COLLAPSE ----
+document.querySelectorAll('.sec-row').forEach(row => {
+  row.addEventListener('click', () => {
+    let next = row.nextElementSibling;
+    const isHidden = next && next.style.display === 'none';
+    while(next && !next.classList.contains('sec-row')) {
+      next.style.display = isHidden ? '' : 'none';
+      next = next.nextElementSibling;
+    }
+    const td = row.querySelector('td');
+    if(td) {
+      td.innerHTML = td.innerHTML.replace(/[\u25B6\u25BC]/g, '') ;
+      td.innerHTML = (isHidden ? '\u25BC ' : '\u25B6 ') + td.innerHTML.trim();
+    }
+  });
+});
+
+// Initialize view
+applyView();
+</script>
+</body>
+</html>
